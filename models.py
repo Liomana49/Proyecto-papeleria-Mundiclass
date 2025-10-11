@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, Enum as SAEnum, UniqueConstraint, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from enum import Enum
-from database import Base
+from base import Base
 from datetime import datetime
 
 class TipoCliente(str, Enum):
@@ -15,7 +15,7 @@ class RolUsuario(str, Enum):
     cliente = "cliente"
 
 class Categoria(Base):
-    _tablename_ = "categorias"
+    __tablename__ = "categorias"
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(100), unique=True, index=True, nullable=False)
     imagen_url = Column(String, nullable=True)
@@ -23,7 +23,7 @@ class Categoria(Base):
     productos = relationship("Producto", back_populates="categoria")
 
 class Producto(Base):
-    _tablename_ = "productos"
+    __tablename__ = "productos"
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(150), nullable=False)
     categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=False)
@@ -35,8 +35,8 @@ class Producto(Base):
     compras = relationship("Compra", back_populates="producto")
 
 class Cliente(Base):
-    _tablename_ = "clientes"
-    _table_args_ = (
+    __tablename__ = "clientes"
+    __table_args__ = (
         UniqueConstraint("cedula", name="uq_clientes_cedula"),
     )
 
@@ -50,8 +50,8 @@ class Cliente(Base):
     compras = relationship("Compra", back_populates="cliente")
 
 class Usuario(Base):
-    _tablename_ = "usuarios"
-    _table_args_ = (
+    __tablename__ = "usuarios"
+    __table_args__ = (
         UniqueConstraint("cedula", name="uq_usuarios_cedula"),
     )
 
@@ -61,7 +61,7 @@ class Usuario(Base):
     rol = Column(SAEnum(RolUsuario), nullable=False, default=RolUsuario.vendedor)
 
 class Compra(Base):
-    _tablename_ = "compras"
+    __tablename__ = "compras"
 
     id = Column(Integer, primary_key=True, index=True)
     cliente_id = Column(Integer, ForeignKey("clientes.id"), nullable=False)

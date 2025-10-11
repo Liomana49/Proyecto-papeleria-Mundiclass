@@ -4,8 +4,9 @@ import os
 from dotenv import load_dotenv
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from base import Base
 
 load_dotenv()
 
@@ -36,8 +37,7 @@ AsyncSessionLocal = async_sessionmaker(
     class_=AsyncSession,
 )
 
-# 5) Base de modelos
-Base = declarative_base()
+# 5) Base de modelos imported from base
 
 # Sync session for CRUD
 sync_engine = create_engine(DATABASE_URL, echo=False)
