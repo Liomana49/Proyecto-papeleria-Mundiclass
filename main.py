@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-# Importa la función que crea las tablas con SQLAlchemy async
+
 from database import init_models
 
-# Importa tus routers (si ya los tienes)
+
 from router_categorias import router as categorias_router
 from router_productos import router as productos_router
 from router_clientes import router as clientes_router
