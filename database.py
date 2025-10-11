@@ -1,10 +1,11 @@
-# database.py
+
 from __future__ import annotations
 import os
 from dotenv import load_dotenv
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy import create_engine
 
 load_dotenv()
 
@@ -38,6 +39,17 @@ AsyncSessionLocal = async_sessionmaker(
 # 5) Base de modelos
 Base = declarative_base()
 
+# Sync session for CRUD
+sync_engine = create_engine(DATABASE_URL, echo=False)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 # 6) Dependency para FastAPI
 async def get_async_db() -> AsyncSession:
     async with AsyncSessionLocal() as session:
@@ -47,10 +59,6 @@ async def get_async_db() -> AsyncSession:
 async def init_models():
     async with async_engine.begin() as conn:
         # IMPORTA TUS MODELOS AQUÍ (import dentro de la función)
-        from models import Categoria
-        from producto import Producto
-        from cliente import Cliente
-        from compra import Compra
-        from usuario import Usuario
+        from models import Categoria, Producto, Cliente, Usuario, Compra
 
         await conn.run_sync(Base.metadata.create_all)

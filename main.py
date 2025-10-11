@@ -5,11 +5,10 @@ from contextlib import asynccontextmanager
 from database import init_models
 
 
-from router_categorias import router as categorias_router
-from router_productos import router as productos_router
-from router_clientes import router as clientes_router
-from router_compras import router as compras_router
-from router_usuarios import router as usuarios_router
+from routers.router_categorias import router as categorias_router
+from routers.router_producto import router as productos_router
+from routers.router_cliente import router as clientes_router
+from routers.router_compra import router as compras_router
 
 
 @asynccontextmanager

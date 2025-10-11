@@ -1,14 +1,10 @@
 from typing import List
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from models import Categoria
-from producto import Producto
-from cliente import Cliente
-from compra import Compra
-from usuario import Usuario
+from models import *
 import schemas
 
-# --------- Categorías ---------
+
 def crear_categoria(db: Session, data: schemas.CategoriaCreate) -> Categoria:
     if db.query(Categoria).filter(Categoria.nombre == data.nombre).first():
         raise HTTPException(400, "La categoría ya existe")

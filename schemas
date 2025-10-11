@@ -1,10 +1,9 @@
 from typing import Optional, List
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from cliente import TipoCliente
-from usuario import RolUsuario
+from models import TipoCliente, RolUsuario
 
-# ---------- Categoría ----------
+
 class CategoriaBase(BaseModel):
     nombre: str
     imagen_url: Optional[str] = None
