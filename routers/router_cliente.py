@@ -1,27 +1,28 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from ..database import get_db
-from .. import crud, schemas
+from database import get_db
+from crud import crear_cliente, listar_clientes, obtener_cliente, actualizar_cliente, borrar_cliente
+from schemas import ClienteCreate, ClienteUpdate, ClienteRead
 
 router = APIRouter()
 
-@router.post("/", response_model=schemas.ClienteRead)
-def create_cliente(cliente: schemas.ClienteCreate, db: Session = Depends(get_db)):
-    return crud.crear_cliente(db, cliente)
+@router.post("/", response_model=ClienteRead)
+def create_cliente(cliente: ClienteCreate, db: Session = Depends(get_db)):
+    return crear_cliente(db, cliente)
 
-@router.get("/", response_model=list[schemas.ClienteRead])
+@router.get("/", response_model=list[ClienteRead])
 def read_clientes(db: Session = Depends(get_db)):
-    return crud.listar_clientes(db)
+    return listar_clientes(db)
 
-@router.get("/{cliente_id}", response_model=schemas.ClienteRead)
+@router.get("/{cliente_id}", response_model=ClienteRead)
 def read_cliente(cliente_id: int, db: Session = Depends(get_db)):
-    return crud.obtener_cliente(db, cliente_id)
+    return obtener_cliente(db, cliente_id)
 
-@router.put("/{cliente_id}", response_model=schemas.ClienteRead)
-def update_cliente(cliente_id: int, cliente: schemas.ClienteUpdate, db: Session = Depends(get_db)):
-    return crud.actualizar_cliente(db, cliente_id, cliente)
+@router.put("/{cliente_id}", response_model=ClienteRead)
+def update_cliente(cliente_id: int, cliente: ClienteUpdate, db: Session = Depends(get_db)):
+    return actualizar_cliente(db, cliente_id, cliente)
 
 @router.delete("/{cliente_id}")
 def delete_cliente(cliente_id: int, db: Session = Depends(get_db)):
-    crud.borrar_cliente(db, cliente_id)
+    borrar_cliente(db, cliente_id)
     return {"message": "Cliente deleted"}
