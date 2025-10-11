@@ -1,0 +1,88 @@
+from typing import Optional, List
+from pydantic import BaseModel, ConfigDict
+from datetime import datetime
+from cliente import TipoCliente
+from usuario import RolUsuario
+
+# ---------- Categoría ----------
+class CategoriaBase(BaseModel):
+    nombre: str
+    imagen_url: Optional[str] = None
+
+class CategoriaCreate(CategoriaBase): pass
+class CategoriaUpdate(BaseModel):
+    nombre: Optional[str] = None
+    imagen_url: Optional[str] = None
+
+class CategoriaRead(CategoriaBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+# ---------- Producto ----------
+class ProductoBase(BaseModel):
+    nombre: str
+    categoria_id: int
+    imagen_url: Optional[str] = None
+    stock: int = 0
+    stock_minimo: int = 0
+
+class ProductoCreate(ProductoBase): pass
+class ProductoUpdate(BaseModel):
+    nombre: Optional[str] = None
+    categoria_id: Optional[int] = None
+    imagen_url: Optional[str] = None
+    stock: Optional[int] = None
+    stock_minimo: Optional[int] = None
+
+class ProductoRead(ProductoBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+# ---------- Cliente ----------
+class ClienteBase(BaseModel):
+    nombre: str
+    cedula: str
+    tipo: TipoCliente = TipoCliente.minorista
+    es_potencial: bool = False
+    frecuencia_compra_dias: Optional[int] = None
+
+class ClienteCreate(ClienteBase): pass
+class ClienteUpdate(BaseModel):
+    nombre: Optional[str] = None
+    cedula: Optional[str] = None
+    tipo: Optional[TipoCliente] = None
+    es_potencial: Optional[bool] = None
+    frecuencia_compra_dias: Optional[int] = None
+
+class ClienteRead(ClienteBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+# ---------- Usuario ----------
+class UsuarioBase(BaseModel):
+    nombre: str
+    cedula: str
+    rol: RolUsuario
+
+class UsuarioCreate(UsuarioBase): pass
+class UsuarioUpdate(BaseModel):
+    nombre: Optional[str] = None
+    cedula: Optional[str] = None
+    rol: Optional[RolUsuario] = None
+
+class UsuarioRead(UsuarioBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+# ---------- Compra ----------
+class CompraBase(BaseModel):
+    cliente_id: int
+    producto_id: int
+    cantidad: int
+
+class CompraCreate(CompraBase): pass
+
+class CompraRead(CompraBase):
+    id: int
+    fecha: datetime
+    model_config = ConfigDict(from_attributes=True)
