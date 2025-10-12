@@ -3,11 +3,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import Categoria
-from producto import Producto
-from cliente import Cliente
-from compra import Compra
-from usuario import Usuario
+from models import Categoria, Producto, Cliente, Compra, Usuario
 import schemas
 
 # ------------------ CATEGORÍAS ------------------
