@@ -1,7 +1,5 @@
-# producto
 
-
-productofrom fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database import get_db
 from crud import crear_producto, listar_productos, obtener_producto, actualizar_producto, borrar_producto, productos_bajo_stock
