@@ -1,33 +1,34 @@
-
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from database import get_db
-from crud import crear_producto, listar_productos, obtener_producto, actualizar_producto, borrar_producto, productos_bajo_stock
-from schemas import ProductoCreate, ProductoUpdate, ProductoRead
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
 
-router = APIRouter()
+from database import get_async_db
+import schemas
+import crud  # <- tu CRUD ya migrado a async
 
-@router.post("/", response_model=ProductoRead)
-def create_producto(producto: ProductoCreate, db: Session = Depends(get_db)):
-    return crear_producto(db, producto)
+router = APIRouter(prefix="/productos", tags=["Productos"])
 
-@router.get("/", response_model=list[ProductoRead])
-def read_productos(db: Session = Depends(get_db)):
-    return listar_productos(db)
+@router.post("/", response_model=schemas.ProductoRead)
+async def create_producto(producto: schemas.ProductoCreate, db: AsyncSession = Depends(get_async_db)):
+    return await crud.crear_producto(db, producto)
 
-@router.get("/{producto_id}", response_model=ProductoRead)
-def read_producto(producto_id: int, db: Session = Depends(get_db)):
-    return obtener_producto(db, producto_id)
+@router.get("/", response_model=List[schemas.ProductoRead])
+async def read_productos(db: AsyncSession = Depends(get_async_db)):
+    return await crud.listar_productos(db)
 
-@router.put("/{producto_id}", response_model=ProductoRead)
-def update_producto(producto_id: int, producto: ProductoUpdate, db: Session = Depends(get_db)):
-    return actualizar_producto(db, producto_id, producto)
+@router.get("/{producto_id}", response_model=schemas.ProductoRead)
+async def read_producto(producto_id: int, db: AsyncSession = Depends(get_async_db)):
+    return await crud.obtener_producto(db, producto_id)
+
+@router.put("/{producto_id}", response_model=schemas.ProductoRead)
+async def update_producto(producto_id: int, producto: schemas.ProductoUpdate, db: AsyncSession = Depends(get_async_db)):
+    return await crud.actualizar_producto(db, producto_id, producto)
 
 @router.delete("/{producto_id}")
-def delete_producto(producto_id: int, db: Session = Depends(get_db)):
-    borrar_producto(db, producto_id)
-    return {"message": "Producto deleted"}
+async def delete_producto(producto_id: int, db: AsyncSession = Depends(get_async_db)):
+    await crud.borrar_producto(db, producto_id)
+    return {"message": "Producto eliminado"}
 
-@router.get("/bajo-stock", response_model=list[ProductoRead])
-def read_productos_bajo_stock(db: Session = Depends(get_db)):
-    return productos_bajo_stock(db)
+@router.get("/bajo-stock", response_model=List[schemas.ProductoRead])
+async def read_productos_bajo_stock(db: AsyncSession = Depends(get_async_db)):
+    return await crud.productos_bajo_stock(db)

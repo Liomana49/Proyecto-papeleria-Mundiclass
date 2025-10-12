@@ -1,28 +1,30 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from database import get_db
-from crud import crear_cliente, listar_clientes, obtener_cliente, actualizar_cliente, borrar_cliente
-from schemas import ClienteCreate, ClienteUpdate, ClienteRead
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
 
-router = APIRouter()
+from database import get_async_db
+import schemas
+import crud
 
-@router.post("/", response_model=ClienteRead)
-def create_cliente(cliente: ClienteCreate, db: Session = Depends(get_db)):
-    return crear_cliente(db, cliente)
+router = APIRouter(prefix="/clientes", tags=["Clientes"])
 
-@router.get("/", response_model=list[ClienteRead])
-def read_clientes(db: Session = Depends(get_db)):
-    return listar_clientes(db)
+@router.post("/", response_model=schemas.ClienteRead)
+async def create_cliente(cliente: schemas.ClienteCreate, db: AsyncSession = Depends(get_async_db)):
+    return await crud.crear_cliente(db, cliente)
 
-@router.get("/{cliente_id}", response_model=ClienteRead)
-def read_cliente(cliente_id: int, db: Session = Depends(get_db)):
-    return obtener_cliente(db, cliente_id)
+@router.get("/", response_model=List[schemas.ClienteRead])
+async def read_clientes(db: AsyncSession = Depends(get_async_db)):
+    return await crud.listar_clientes(db)
 
-@router.put("/{cliente_id}", response_model=ClienteRead)
-def update_cliente(cliente_id: int, cliente: ClienteUpdate, db: Session = Depends(get_db)):
-    return actualizar_cliente(db, cliente_id, cliente)
+@router.get("/{cliente_id}", response_model=schemas.ClienteRead)
+async def read_cliente(cliente_id: int, db: AsyncSession = Depends(get_async_db)):
+    return await crud.obtener_cliente(db, cliente_id)
+
+@router.put("/{cliente_id}", response_model=schemas.ClienteRead)
+async def update_cliente(cliente_id: int, cliente: schemas.ClienteUpdate, db: AsyncSession = Depends(get_async_db)):
+    return await crud.actualizar_cliente(db, cliente_id, cliente)
 
 @router.delete("/{cliente_id}")
-def delete_cliente(cliente_id: int, db: Session = Depends(get_db)):
-    borrar_cliente(db, cliente_id)
-    return {"message": "Cliente deleted"}
+async def delete_cliente(cliente_id: int, db: AsyncSession = Depends(get_async_db)):
+    await crud.borrar_cliente(db, cliente_id)
+    return {"message": "Cliente eliminado"}

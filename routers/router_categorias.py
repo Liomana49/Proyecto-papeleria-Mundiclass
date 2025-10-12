@@ -1,28 +1,30 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from database import get_db
-from crud import crear_categoria, listar_categorias, obtener_categoria, actualizar_categoria, borrar_categoria
-from schemas import CategoriaCreate, CategoriaUpdate, CategoriaRead
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
 
-router = APIRouter()
+from database import get_async_db
+import schemas
+import crud
 
-@router.post("/", response_model=CategoriaRead)
-def create_categoria(categoria: CategoriaCreate, db: Session = Depends(get_db)):
-    return crear_categoria(db, categoria)
+router = APIRouter(prefix="/categorias", tags=["Categorías"])
 
-@router.get("/", response_model=list[CategoriaRead])
-def read_categorias(db: Session = Depends(get_db)):
-    return listar_categorias(db)
+@router.post("/", response_model=schemas.CategoriaRead)
+async def create_categoria(categoria: schemas.CategoriaCreate, db: AsyncSession = Depends(get_async_db)):
+    return await crud.crear_categoria(db, categoria)
 
-@router.get("/{categoria_id}", response_model=CategoriaRead)
-def read_categoria(categoria_id: int, db: Session = Depends(get_db)):
-    return obtener_categoria(db, categoria_id)
+@router.get("/", response_model=List[schemas.CategoriaRead])
+async def read_categorias(db: AsyncSession = Depends(get_async_db)):
+    return await crud.listar_categorias(db)
 
-@router.put("/{categoria_id}", response_model=CategoriaRead)
-def update_categoria(categoria_id: int, categoria: CategoriaUpdate, db: Session = Depends(get_db)):
-    return actualizar_categoria(db, categoria_id, categoria)
+@router.get("/{categoria_id}", response_model=schemas.CategoriaRead)
+async def read_categoria(categoria_id: int, db: AsyncSession = Depends(get_async_db)):
+    return await crud.obtener_categoria(db, categoria_id)
+
+@router.put("/{categoria_id}", response_model=schemas.CategoriaRead)
+async def update_categoria(categoria_id: int, categoria: schemas.CategoriaUpdate, db: AsyncSession = Depends(get_async_db)):
+    return await crud.actualizar_categoria(db, categoria_id, categoria)
 
 @router.delete("/{categoria_id}")
-def delete_categoria(categoria_id: int, db: Session = Depends(get_db)):
-    borrar_categoria(db, categoria_id)
-    return {"message": "Categoria deleted"}
+async def delete_categoria(categoria_id: int, db: AsyncSession = Depends(get_async_db)):
+    await crud.borrar_categoria(db, categoria_id)
+    return {"message": "Categoría eliminada"}
