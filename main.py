@@ -9,6 +9,7 @@ from routers.router_categorias import router as categorias_router
 from routers.router_producto import router as productos_router
 from routers.router_cliente import router as clientes_router
 from routers.router_compra import router as compras_router
+from routers.router_usuario    import router as usuarios_router
 
 
 @asynccontextmanager
