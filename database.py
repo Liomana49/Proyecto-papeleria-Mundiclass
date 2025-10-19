@@ -1,64 +1,31 @@
-
-from __future__ import annotations
-import os
-from dotenv import load_dotenv
-
+# database.py
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-from base import Base
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.pool import NullPool
 
-load_dotenv()
+# Configura tu cadena de conexión
+# Ejemplo para PostgreSQL en Render / local:
+# postgresql+asyncpg://usuario:contraseña@host:puerto/base_datos
+DATABASE_URL = "postgresql+asyncpg://postgres:1234@localhost:5432/mundiclass_db"
 
-# 1) Lee la URL del entorno (Render la inyecta como DATABASE_URL)
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-# 2) Si no hay URL (local), usa SQLite async
-if not DATABASE_URL:
-    DATABASE_URL = "sqlite+aiosqlite:///./app.db"
-
-# 3) Convierte a async si viene como 'postgresql://'
-if DATABASE_URL.startswith("postgresql://"):
-    DATABASE_URL_ASYNC = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
-else:
-    DATABASE_URL_ASYNC = DATABASE_URL  # ya sería async o sqlite+aiosqlite
-
-# 4) Engine y Session asíncronos
-async_engine = create_async_engine(
-    DATABASE_URL_ASYNC,
-    echo=False,
-    pool_pre_ping=True,
+# Crear motor asíncrono
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=False,          # cambia a True si quieres ver las consultas SQL en consola
+    poolclass=NullPool   # opcional si estás en Render o conexiones cortas
 )
 
+# Crear fábrica de sesiones asíncronas
 AsyncSessionLocal = async_sessionmaker(
-    bind=async_engine,
-    expire_on_commit=False,
-    autoflush=False,
+    bind=engine,
     class_=AsyncSession,
+    expire_on_commit=False,
 )
 
-# 5) Base de modelos imported from base
+# Base declarativa para tus modelos
+Base = declarative_base()
 
-# Sync session for CRUD
-sync_engine = create_engine(DATABASE_URL, echo=False)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_engine)
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-# 6) Dependency para FastAPI
-async def get_async_db() -> AsyncSession:
+# Dependencia de sesión (para usar en los routers)
+async def get_db() -> AsyncSession:
     async with AsyncSessionLocal() as session:
         yield session
-
-# 7) Crear tablas al inicio (se importa modelos DENTRO para evitar ciclos)
-async def init_models():
-    async with async_engine.begin() as conn:
-        # IMPORTA TUS MODELOS AQUÍ (import dentro de la función)
-        from models import Categoria, Producto, Cliente, Usuario, Compra
-
-        await conn.run_sync(Base.metadata.create_all)

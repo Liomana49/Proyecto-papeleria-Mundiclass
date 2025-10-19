@@ -1,34 +1,74 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
-
-from database import get_async_db
-import schemas
-import crud  # <- tu CRUD ya migrado a async
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Query, HTTPException
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from database import get_db
+from models import Producto
+from schemas import ProductoCreate, ProductoUpdate, ProductoRead
 
 router = APIRouter(prefix="/productos", tags=["Productos"])
 
-@router.post("/", response_model=schemas.ProductoRead)
-async def create_producto(producto: schemas.ProductoCreate, db: AsyncSession = Depends(get_async_db)):
-    return await crud.crear_producto(db, producto)
+@router.get("/", response_model=List[ProductoRead])
+def listar_productos(
+    db: Session = Depends(get_db),
+    nombre: Optional[str] = Query(None, description="contiene"),
+    min_stock: Optional[int] = Query(None, description="stock mínimo"),
+    skip: int = 0, limit: int = 50
+):
+    q = db.query(Producto)
+    if nombre: q = q.filter(Producto.nombre.ilike(f"%{nombre}%"))
+    if min_stock is not None: q = q.filter(Producto.stock >= min_stock)
+    return q.offset(skip).limit(limit).all()
 
-@router.get("/", response_model=List[schemas.ProductoRead])
-async def read_productos(db: AsyncSession = Depends(get_async_db)):
-    return await crud.listar_productos(db)
+@router.get("/{producto_id}", response_model=ProductoRead)
+def obtener_producto(producto_id: int, db: Session = Depends(get_db)):
+    p = db.get(Producto, producto_id)
+    if not p: raise HTTPException(404, "Producto no encontrado")
+    return p
 
-@router.get("/{producto_id}", response_model=schemas.ProductoRead)
-async def read_producto(producto_id: int, db: AsyncSession = Depends(get_async_db)):
-    return await crud.obtener_producto(db, producto_id)
+@router.get("/{producto_id}/precio")
+def precio_para_cantidad(producto_id: int, cantidad: int = 1, db: Session = Depends(get_db)):
+    p = db.get(Producto, producto_id)
+    if not p: raise HTTPException(404, "Producto no encontrado")
+    if cantidad <= 0: raise HTTPException(400, "Cantidad debe ser > 0")
 
-@router.put("/{producto_id}", response_model=schemas.ProductoRead)
-async def update_producto(producto_id: int, producto: schemas.ProductoUpdate, db: AsyncSession = Depends(get_async_db)):
-    return await crud.actualizar_producto(db, producto_id, producto)
+    precio_unit = p.valor_unitario
+    umbral = p.umbral_mayor or 20
+    if cantidad > umbral and p.valor_unitario_mayor is not None:
+        precio_unit = p.valor_unitario_mayor
 
-@router.delete("/{producto_id}")
-async def delete_producto(producto_id: int, db: AsyncSession = Depends(get_async_db)):
-    await crud.borrar_producto(db, producto_id)
-    return {"message": "Producto eliminado"}
+    total = float(precio_unit) * cantidad
+    return {
+        "producto_id": p.id,
+        "nombre": p.nombre,
+        "cantidad": cantidad,
+        "umbral_mayor": umbral,
+        "precio_unitario_aplicado": float(precio_unit),
+        "total": round(total, 2)
+    }
 
-@router.get("/bajo-stock", response_model=List[schemas.ProductoRead])
-async def read_productos_bajo_stock(db: AsyncSession = Depends(get_async_db)):
-    return await crud.productos_bajo_stock(db)
+@router.post("/", response_model=ProductoRead, status_code=201)
+def crear_producto(data: ProductoCreate, db: Session = Depends(get_db)):
+    p = Producto(**data.model_dump())
+    db.add(p)
+    try:
+        db.commit(); db.refresh(p)
+        return p
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Violación de unicidad en producto")
+
+@router.put("/{producto_id}", response_model=ProductoRead)
+def actualizar_producto(producto_id: int, data: ProductoUpdate, db: Session = Depends(get_db)):
+    p = db.get(Producto, producto_id)
+    if not p: raise HTTPException(404, "Producto no encontrado")
+    for k, v in data.model_dump(exclude_unset=True).items():
+        setattr(p, k, v)
+    db.commit(); db.refresh(p)
+    return p
+
+@router.delete("/{producto_id}", status_code=204)
+def borrar_producto(producto_id: int, db: Session = Depends(get_db)):
+    p = db.get(Producto, producto_id)
+    if not p: raise HTTPException(404, "Producto no encontrado")
+    db.delete(p); db.commit()

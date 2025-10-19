@@ -1,30 +1,62 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
-
-from database import get_async_db
-import schemas
-import crud
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Query, HTTPException
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from database import get_db
+from models import Usuario
+from schemas import UsuarioCreate, UsuarioUpdate, UsuarioRead
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
-@router.post("/", response_model=schemas.UsuarioRead)
-async def create_usuario(usuario: schemas.UsuarioCreate, db: AsyncSession = Depends(get_async_db)):
-    return await crud.crear_usuario(db, usuario)
+@router.get("/", response_model=List[UsuarioRead])
+def listar_usuarios(
+    db: Session = Depends(get_db),
+    tipo: Optional[str] = Query(None, description="mayorista | minorista"),
+    cedula: Optional[str] = Query(None, description="coincidencia exacta"),
+    frecuente: Optional[bool] = Query(None, description="cliente frecuente"),
+    skip: int = 0, limit: int = 50
+):
+    q = db.query(Usuario)
+    if tipo: q = q.filter(Usuario.tipo == tipo)
+    if cedula: q = q.filter(Usuario.cedula == cedula)
+    if frecuente is not None: q = q.filter(Usuario.cliente_frecuente == frecuente)
+    return q.offset(skip).limit(limit).all()
 
-@router.get("/", response_model=List[schemas.UsuarioRead])
-async def read_usuarios(db: AsyncSession = Depends(get_async_db)):
-    return await crud.listar_usuarios(db)
+@router.get("/{usuario_id}", response_model=UsuarioRead)
+def obtener_usuario(usuario_id: int, db: Session = Depends(get_db)):
+    u = db.get(Usuario, usuario_id)
+    if not u: raise HTTPException(404, "Usuario no encontrado")
+    return u
 
-@router.get("/{usuario_id}", response_model=schemas.UsuarioRead)
-async def read_usuario(usuario_id: int, db: AsyncSession = Depends(get_async_db)):
-    return await crud.obtener_usuario(db, usuario_id)
+@router.get("/by-cedula/{cedula}", response_model=UsuarioRead)
+def obtener_por_cedula(cedula: str, db: Session = Depends(get_db)):
+    u = db.query(Usuario).filter(Usuario.cedula == cedula).first()
+    if not u: raise HTTPException(404, "Usuario no encontrado")
+    return u
 
-@router.put("/{usuario_id}", response_model=schemas.UsuarioRead)
-async def update_usuario(usuario_id: int, usuario: schemas.UsuarioUpdate, db: AsyncSession = Depends(get_async_db)):
-    return await crud.actualizar_usuario(db, usuario_id, usuario)
+@router.post("/", response_model=UsuarioRead, status_code=201)
+def crear_usuario(data: UsuarioCreate, db: Session = Depends(get_db)):
+    u = Usuario(**data.model_dump())
+    db.add(u)
+    try:
+        db.commit(); db.refresh(u)
+        return u
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Cédula ya registrada")
 
-@router.delete("/{usuario_id}")
-async def delete_usuario(usuario_id: int, db: AsyncSession = Depends(get_async_db)):
-    await crud.borrar_usuario(db, usuario_id)
-    return {"message": "Usuario eliminado"}
+@router.put("/{usuario_id}", response_model=UsuarioRead)
+def actualizar_usuario(usuario_id: int, data: UsuarioUpdate, db: Session = Depends(get_db)):
+    u = db.get(Usuario, usuario_id)
+    if not u: raise HTTPException(404, "Usuario no encontrado")
+    for k, v in data.model_dump(exclude_unset=True).items():
+        setattr(u, k, v)
+    db.commit(); db.refresh(u)
+    return u
+
+@router.delete("/{usuario_id}", status_code=204)
+def borrar_usuario(usuario_id: int, db: Session = Depends(get_db)):
+    u = db.get(Usuario, usuario_id)
+    if not u: raise HTTPException(404, "Usuario no encontrado")
+    db.delete(u); db.commit()
+
