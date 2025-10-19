@@ -6,7 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # ⬇️ Ajusta estos imports a tu estructura real de proyecto
 from database import engine, Base  # engine = create_async_engine(...), Base = Declarative Base
-from routers import usuarios, clientes, productos, categorias, compras
+from models import Usuario, Cliente, Producto, Categoria, Compra
+
 
 
 # -------------------------------
