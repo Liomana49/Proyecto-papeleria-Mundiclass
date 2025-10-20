@@ -11,32 +11,39 @@ load_dotenv()
 
 def to_asyncpg_url(url: str) -> str:
     """
-    Convierte postgres:// o postgresql:// a postgresql+asyncpg://
-    y ajusta los parámetros SSL para Render (usa ssl=true).
+    Normaliza la URL para SQLAlchemy + asyncpg:
+    - postgres://  -> postgresql://
+    - postgresql(s):// -> postgresql+asyncpg://
+    - elimina sslmode=... (asyncpg no lo acepta)
+    - añade ssl=true (Render requiere SSL)
     """
     if not url:
         raise ValueError("La variable de entorno DATABASE_URL no está definida")
 
-    # Normaliza prefijo
+    # 1) normaliza esquema base
     if url.startswith("postgres://"):
         url = url.replace("postgres://", "postgresql://", 1)
 
     p = urlparse(url)
+
+    # 2) normaliza a driver asyncpg SIEMPRE
     scheme = "postgresql+asyncpg"
 
-    # Limpia y ajusta parámetros
+    # 3) limpia query params y fuerza ssl para asyncpg
     q = dict(parse_qsl(p.query))
-    q.pop("sslmode", None)   # asyncpg no acepta sslmode
-    q["ssl"] = "true"        # Render requiere SSL
+    # eliminar cualquier 'sslmode' que venga de Render/psycopg
+    q.pop("sslmode", None)
+    # si ya hubiera 'ssl', lo respetamos; si no, lo activamos
+    q.setdefault("ssl", "true")
 
     new = p._replace(scheme=scheme, query=urlencode(q))
     return urlunparse(new)
 
-# Carga la URL del entorno
+# --- construir URL final ---
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 ASYNC_DATABASE_URL = to_asyncpg_url(DATABASE_URL)
 
-# Crea el motor asíncrono
+# --- engine/Session/Base ---
 engine = create_async_engine(
     ASYNC_DATABASE_URL,
     echo=False,
@@ -44,20 +51,17 @@ engine = create_async_engine(
     poolclass=NullPool,
 )
 
-# Crea sesión asíncrona
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
-    expire_on_commit=False
+    expire_on_commit=False,
 )
 
-# Base declarativa para los modelos
 Base = declarative_base()
 
-# Dependencia para los routers
 async def get_async_db() -> AsyncSession:
     async with AsyncSessionLocal() as session:
         yield session
 
-# Alias para compatibilidad con los routers existentes
+# Alias para routers
 get_db = get_async_db
