@@ -9,30 +9,42 @@ from sqlalchemy.pool import NullPool
 
 load_dotenv()
 
-
-def _to_asyncpg_url(url: str) -> str:
+def to_asyncpg_url(url: str) -> str:
     """
     Convierte postgres:// o postgresql:// a postgresql+asyncpg://
-    y agrega sslmode=require si no está (necesario en Render).
+    - Cambia ?sslmode=require --> ?ssl=true (asyncpg no entiende sslmode)
+    - En local (host=localhost/127.0.0.1) NO fuerza SSL.
     """
     if not url:
         raise ValueError("La variable de entorno DATABASE_URL no está definida")
 
+    # Normaliza esquema base
     if url.startswith("postgres://"):
         url = url.replace("postgres://", "postgresql://", 1)
 
-    parsed = urlparse(url)
+    p = urlparse(url)
     scheme = "postgresql+asyncpg"
-    query = dict(parse_qsl(parsed.query))
-    query.setdefault("sslmode", "require")
 
-    new = parsed._replace(scheme=scheme, query=urlencode(query))
+    # Query params
+    q = dict(parse_qsl(p.query))
+
+    host = p.hostname or ""
+    is_local = host in ("localhost", "127.0.0.1")
+
+    # Elimina sslmode (propio de psycopg)
+    q.pop("sslmode", None)
+
+    # Para asyncpg usa 'ssl' (bool). En Render (no local) lo activamos.
+    if not is_local:
+        q["ssl"] = "true"   # asyncpg -> ssl=True
+    else:
+        q.pop("ssl", None)  # sin SSL en local
+
+    new = p._replace(scheme=scheme, query=urlencode(q))
     return urlunparse(new)
 
-
-# --- Configuración del motor y sesión ---
-DATABASE_URL = os.getenv("DATABASE_URL")
-ASYNC_DATABASE_URL = _to_asyncpg_url(DATABASE_URL)
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+ASYNC_DATABASE_URL = to_asyncpg_url(DATABASE_URL)
 
 engine = create_async_engine(
     ASYNC_DATABASE_URL,
@@ -41,19 +53,13 @@ engine = create_async_engine(
     poolclass=NullPool,
 )
 
-AsyncSessionLocal = async_sessionmaker(
-    bind=engine, class_=AsyncSession, expire_on_commit=False
-)
+AsyncSessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 Base = declarative_base()
 
-
-# --- Dependencias para los routers ---
 async def get_async_db() -> AsyncSession:
-    """Sesión asíncrona para usar con FastAPI"""
     async with AsyncSessionLocal() as session:
         yield session
 
-
-# 🔹 Alias para compatibilidad con los routers que usan get_db
+# Alias para tus routers
 get_db = get_async_db
