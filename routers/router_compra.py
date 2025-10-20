@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
-from database import get_db
+from database import get_async_db as get_db
 from models import Compra, DetalleCompra, Producto, Cliente
 from schemas import CompraCreate, CompraRead
 

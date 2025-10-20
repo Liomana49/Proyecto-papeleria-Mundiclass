@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from database import get_db
+from database import get_async_db as get_db
 from models import Categoria
 from schemas import CategoriaCreate, CategoriaUpdate, CategoriaRead
 
