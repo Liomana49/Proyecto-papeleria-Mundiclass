@@ -1,130 +1,96 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-from database import get_async_db as get_db
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from database import get_db
 from models import Cliente, Usuario
-from schemas import ClienteCreate, ClienteUpdate, ClienteRead
+import schemas
 
 router = APIRouter(prefix="/clientes", tags=["Clientes"])
 
-
-# =========================================================
-# LISTAR CLIENTES (con filtros)
-# =========================================================
-@router.get("/", response_model=List[ClienteRead])
-def listar_clientes(
-    db: Session = Depends(get_db),
-    nombre: Optional[str] = Query(None, description="Filtrar por nombre de usuario asociado"),
-    activo: Optional[bool] = Query(None, description="Filtrar por estado activo"),
-    tipo: Optional[str] = Query(None, description="Filtrar por tipo de usuario (mayorista o minorista)"),
-    frecuente: Optional[bool] = Query(None, description="Filtrar si el usuario es cliente frecuente"),
-    skip: int = 0,
-    limit: int = 50
+@router.get("/", response_model=List[schemas.ClienteRead])
+async def listar_clientes(
+    nombre: Optional[str] = Query(None, description="nombre del usuario vinculado"),
+    activo: Optional[bool] = Query(None),
+    tipo: Optional[str] = Query(None, description="mayorista | minorista"),
+    frecuente: Optional[bool] = Query(None),
+    db: AsyncSession = Depends(get_db),
 ):
-    """
-    Lista todos los clientes con filtros opcionales:
-    - nombre: busca coincidencias parciales en el nombre del usuario.
-    - activo: True/False.
-    - tipo: 'mayorista' o 'minorista' (desde el Usuario).
-    - frecuente: si el usuario tiene cliente_frecuente = True.
-    """
-    q = db.query(Cliente).join(Usuario)
-
+    # join con Usuario para filtros por nombre/tipo/frecuente
+    stmt = select(Cliente).join(Usuario)
     if nombre:
-        q = q.filter(Usuario.nombre.ilike(f"%{nombre}%"))
+        stmt = stmt.where(Usuario.nombre.ilike(f"%{nombre}%"))
     if tipo:
-        q = q.filter(Usuario.tipo == tipo)
+        stmt = stmt.where(Usuario.tipo == tipo)
     if frecuente is not None:
-        q = q.filter(Usuario.cliente_frecuente == frecuente)
+        stmt = stmt.where(Usuario.cliente_frecuente == frecuente)
     if activo is not None:
-        q = q.filter(Cliente.activo == activo)
+        stmt = stmt.where(Cliente.activo == activo)
+    res = await db.execute(stmt)
+    return res.scalars().all()
 
-    return q.offset(skip).limit(limit).all()
+@router.get("/{cliente_id}", response_model=schemas.ClienteRead)
+async def obtener_cliente(cliente_id: int, db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(Cliente).where(Cliente.id == cliente_id))
+    obj = res.scalar_one_or_none()
+    if not obj:
+        raise HTTPException(404, "Cliente no encontrado")
+    return obj
 
+@router.get("/by-cedula/{cedula}", response_model=schemas.ClienteRead)
+async def cliente_por_cedula(cedula: str, db: AsyncSession = Depends(get_db)):
+    # compatibilidad: busca por cedula en tabla Cliente (la tienes en el modelo)
+    res = await db.execute(select(Cliente).where(Cliente.cedula == cedula))
+    obj = res.scalar_one_or_none()
+    if not obj:
+        raise HTTPException(404, "Cliente no encontrado con esa cédula")
+    return obj
 
-# =========================================================
-# OBTENER CLIENTE POR ID
-# =========================================================
-@router.get("/{cliente_id}", response_model=ClienteRead)
-def obtener_cliente(cliente_id: int, db: Session = Depends(get_db)):
-    cliente = db.get(Cliente, cliente_id)
-    if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente no encontrado")
-    return cliente
+@router.post("/", response_model=schemas.ClienteRead, status_code=status.HTTP_201_CREATED)
+async def crear_cliente(payload: schemas.ClienteCreate, db: AsyncSession = Depends(get_db)):
+    # si usas usuario_id, valida que exista
+    if payload.usuario_id is not None:
+        ruser = await db.execute(select(Usuario).where(Usuario.id == payload.usuario_id))
+        if not ruser.scalar_one_or_none():
+            raise HTTPException(404, "Usuario no existe")
 
+    # evita cédula duplicada si la envían
+    if payload.cedula:
+        exists = await db.execute(select(Cliente).where(Cliente.cedula == payload.cedula))
+        if exists.scalar_one_or_none():
+            raise HTTPException(400, "Ya existe un cliente con esa cédula")
 
-# =========================================================
-# OBTENER CLIENTE POR CÉDULA (desde su usuario)
-# =========================================================
-@router.get("/by-cedula/{cedula}", response_model=ClienteRead)
-def cliente_por_cedula(cedula: str, db: Session = Depends(get_db)):
-    """
-    Retorna el cliente a partir de la cédula del usuario asociado.
-    """
-    cliente = (
-        db.query(Cliente)
-        .join(Usuario)
-        .filter(Usuario.cedula == cedula)
-        .first()
-    )
-    if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente no encontrado con esa cédula")
-    return cliente
+    obj = Cliente(**payload.model_dump())
+    db.add(obj)
+    await db.commit()
+    await db.refresh(obj)
+    return obj
 
+@router.put("/{cliente_id}", response_model=schemas.ClienteRead)
+async def actualizar_cliente(cliente_id: int, payload: schemas.ClienteUpdate, db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(Cliente).where(Cliente.id == cliente_id))
+    obj = res.scalar_one_or_none()
+    if not obj:
+        raise HTTPException(404, "Cliente no encontrado")
 
-# =========================================================
-# CREAR CLIENTE
-# =========================================================
-@router.post("/", response_model=ClienteRead, status_code=201)
-def crear_cliente(data: ClienteCreate, db: Session = Depends(get_db)):
-    """
-    Crea un nuevo cliente enlazado a un Usuario existente.
-    """
-    usuario = db.get(Usuario, data.usuario_id)
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuario no existe")
+    data = payload.model_dump(exclude_none=True)
+    if "cedula" in data and data["cedula"]:
+        q = await db.execute(select(Cliente).where(Cliente.cedula == data["cedula"], Cliente.id != cliente_id))
+        if q.scalar_one_or_none():
+            raise HTTPException(400, "Ya existe otro cliente con esa cédula")
 
-    # verificar si ya tiene cliente
-    if db.query(Cliente).filter(Cliente.usuario_id == data.usuario_id).first():
-        raise HTTPException(status_code=400, detail="Este usuario ya tiene un perfil de cliente")
+    for k, v in data.items():
+        setattr(obj, k, v)
 
-    cliente = Cliente(**data.model_dump())
-    db.add(cliente)
-    try:
-        db.commit()
-        db.refresh(cliente)
-        return cliente
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=400, detail="Error al crear el cliente")
+    await db.commit()
+    await db.refresh(obj)
+    return obj
 
-
-# =========================================================
-# ACTUALIZAR CLIENTE
-# =========================================================
-@router.put("/{cliente_id}", response_model=ClienteRead)
-def actualizar_cliente(cliente_id: int, data: ClienteUpdate, db: Session = Depends(get_db)):
-    cliente = db.get(Cliente, cliente_id)
-    if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente no encontrado")
-
-    for k, v in data.model_dump(exclude_unset=True).items():
-        setattr(cliente, k, v)
-
-    db.commit()
-    db.refresh(cliente)
-    return cliente
-
-
-# =========================================================
-# ELIMINAR CLIENTE
-# =========================================================
-@router.delete("/{cliente_id}", status_code=204)
-def borrar_cliente(cliente_id: int, db: Session = Depends(get_db)):
-    cliente = db.get(Cliente, cliente_id)
-    if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente no encontrado")
-    db.delete(cliente)
-    db.commit()
-
+@router.delete("/{cliente_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def borrar_cliente(cliente_id: int, db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(Cliente).where(Cliente.id == cliente_id))
+    obj = res.scalar_one_or_none()
+    if not obj:
+        raise HTTPException(404, "Cliente no encontrado")
+    await db.delete(obj)
+    await db.commit()

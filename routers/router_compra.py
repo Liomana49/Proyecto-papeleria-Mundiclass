@@ -1,74 +1,135 @@
+# routers/router_compra.py
+
 from typing import List, Optional
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from sqlalchemy import and_
-from database import get_async_db as get_db
-from models import Compra, DetalleCompra, Producto, Cliente
-from schemas import CompraCreate, CompraRead
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from database import get_db  # alias a get_async_db
+from models import Compra, Producto, Cliente
+import schemas
 
 router = APIRouter(prefix="/compras", tags=["Compras"])
 
-@router.get("/", response_model=List[CompraRead])
-def listar_compras(
-    db: Session = Depends(get_db),
+
+# =========================================================
+# LISTAR COMPRAS
+# =========================================================
+@router.get("/", response_model=List[schemas.CompraRead])
+async def listar_compras(
+    db: AsyncSession = Depends(get_db),
     cliente_id: Optional[int] = Query(None),
+    producto_id: Optional[int] = Query(None),
     desde: Optional[datetime] = Query(None),
     hasta: Optional[datetime] = Query(None),
-    skip: int = 0, limit: int = 50
+    limit: int = 100,
 ):
-    q = db.query(Compra)
-    if cliente_id: q = q.filter(Compra.cliente_id == cliente_id)
-    if desde: q = q.filter(Compra.creado_en >= desde)
-    if hasta: q = q.filter(Compra.creado_en < hasta)
-    return q.offset(skip).limit(limit).all()
+    stmt = select(Compra).order_by(Compra.fecha.desc())
+    if cliente_id:
+        stmt = stmt.where(Compra.cliente_id == cliente_id)
+    if producto_id:
+        stmt = stmt.where(Compra.producto_id == producto_id)
+    if desde:
+        stmt = stmt.where(Compra.fecha >= desde)
+    if hasta:
+        stmt = stmt.where(Compra.fecha < hasta)
+    res = await db.execute(stmt.limit(limit))
+    return res.scalars().all()
 
-@router.get("/{compra_id}", response_model=CompraRead)
-def obtener_compra(compra_id: int, db: Session = Depends(get_db)):
-    c = db.get(Compra, compra_id)
-    if not c: raise HTTPException(404, "Compra no encontrada")
-    return c
 
-@router.post("/", response_model=CompraRead, status_code=201)
-def crear_compra(payload: CompraCreate, db: Session = Depends(get_db)):
+# =========================================================
+# OBTENER COMPRA POR ID
+# =========================================================
+@router.get("/{compra_id}", response_model=schemas.CompraRead)
+async def obtener_compra(compra_id: int, db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(Compra).where(Compra.id == compra_id))
+    obj = res.scalar_one_or_none()
+    if not obj:
+        raise HTTPException(status_code=404, detail="Compra no encontrada")
+    return obj
+
+
+# =========================================================
+# CALCULAR PRECIO PARA UNA CANTIDAD (SIN GUARDAR)
+# =========================================================
+@router.get("/precio/calcular")
+async def calcular_precio(
+    producto_id: int,
+    cantidad: int = 1,
+    db: AsyncSession = Depends(get_db),
+):
+    if cantidad <= 0:
+        raise HTTPException(400, "Cantidad debe ser > 0")
+
+    res = await db.execute(select(Producto).where(Producto.id == producto_id))
+    p = res.scalar_one_or_none()
+    if not p:
+        raise HTTPException(404, "Producto no encontrado")
+
+    precio_unit = p.valor_unitario
+    umbral = p.umbral_mayor or 20
+    if cantidad > umbral and p.valor_unitario_mayor is not None:
+        precio_unit = p.valor_unitario_mayor
+
+    total = float(precio_unit) * cantidad
+    return {
+        "producto_id": p.id,
+        "nombre": p.nombre,
+        "cantidad": cantidad,
+        "umbral_mayor": umbral,
+        "precio_unitario_aplicado": float(precio_unit),
+        "total": round(total, 2),
+    }
+
+
+# =========================================================
+# CREAR COMPRA (DESCUENTA STOCK)
+# =========================================================
+@router.post("/", response_model=schemas.CompraRead, status_code=status.HTTP_201_CREATED)
+async def crear_compra(payload: schemas.CompraCreate, db: AsyncSession = Depends(get_db)):
     # valida cliente
-    if not db.get(Cliente, payload.cliente_id):
-        raise HTTPException(404, "Cliente no existe")
+    rcli = await db.execute(select(Cliente).where(Cliente.id == payload.cliente_id))
+    cliente = rcli.scalar_one_or_none()
+    if not cliente:
+        raise HTTPException(404, "Cliente no encontrado")
 
-    compra = Compra(cliente_id=payload.cliente_id, subtotal=0, total=0)
-    db.add(compra); db.flush()  # para tener compra.id
+    # valida producto
+    rprod = await db.execute(select(Producto).where(Producto.id == payload.producto_id))
+    producto = rprod.scalar_one_or_none()
+    if not producto:
+        raise HTTPException(404, "Producto no encontrado")
 
-    subtotal = 0
-    for item in payload.items:
-        prod = db.get(Producto, item.producto_id)
-        if not prod:
-            raise HTTPException(404, f"Producto {item.producto_id} no existe")
+    if payload.cantidad <= 0:
+        raise HTTPException(400, "La cantidad debe ser mayor a 0")
 
-        # precio según regla (> umbral usa valor_unitario_mayor si existe)
-        precio_unit = prod.valor_unitario
-        umbral = prod.umbral_mayor or 20
-        if item.cantidad > umbral and prod.valor_unitario_mayor is not None:
-            precio_unit = prod.valor_unitario_mayor
+    if producto.stock < payload.cantidad:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Stock insuficiente")
 
-        # si el cliente envía manualmente un precio, lo ignoramos y usamos el calculado
-        precio_aplicado = precio_unit
+    # descontar stock
+    producto.stock -= payload.cantidad
 
-        # (opcional) controlar stock
-        if prod.stock is not None and prod.stock < item.cantidad:
-            raise HTTPException(400, f"Stock insuficiente para {prod.nombre}")
-        # prod.stock -= item.cantidad  # si deseas descontar stock
-        # db.add(prod)
+    compra = Compra(
+        cliente_id=payload.cliente_id,
+        producto_id=payload.producto_id,
+        cantidad=payload.cantidad,
+        # fecha se setea por default en el modelo
+    )
 
-        det = DetalleCompra(
-            compra_id=compra.id,
-            producto_id=prod.id,
-            cantidad=item.cantidad,
-            precio_unitario_aplicado=precio_aplicado
-        )
-        db.add(det)
-        subtotal += float(precio_aplicado) * item.cantidad
-
-    compra.subtotal = subtotal
-    compra.total = subtotal  # impuestos/descuentos si aplica
-    db.commit(); db.refresh(compra)
+    db.add(producto)
+    db.add(compra)
+    await db.commit()
+    await db.refresh(compra)
     return compra
+
+
+# =========================================================
+# ELIMINAR COMPRA
+# =========================================================
+@router.delete("/{compra_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def borrar_compra(compra_id: int, db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(Compra).where(Compra.id == compra_id))
+    obj = res.scalar_one_or_none()
+    if not obj:
+        raise HTTPException(404, "Compra no encontrada")
+    await db.delete(obj)
+    await db.commit()

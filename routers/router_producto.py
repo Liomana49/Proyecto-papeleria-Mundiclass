@@ -1,36 +1,43 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-from database import get_async_db as get_db
-from models import Producto
-from schemas import ProductoCreate, ProductoUpdate, ProductoRead
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from database import get_db
+from models import Producto, Categoria
+import schemas
 
 router = APIRouter(prefix="/productos", tags=["Productos"])
 
-@router.get("/", response_model=List[ProductoRead])
-def listar_productos(
-    db: Session = Depends(get_db),
+@router.get("/", response_model=List[schemas.ProductoRead])
+async def listar_productos(
     nombre: Optional[str] = Query(None, description="contiene"),
     min_stock: Optional[int] = Query(None, description="stock mínimo"),
-    skip: int = 0, limit: int = 50
+    db: AsyncSession = Depends(get_db),
 ):
-    q = db.query(Producto)
-    if nombre: q = q.filter(Producto.nombre.ilike(f"%{nombre}%"))
-    if min_stock is not None: q = q.filter(Producto.stock >= min_stock)
-    return q.offset(skip).limit(limit).all()
+    stmt = select(Producto)
+    if nombre:
+        stmt = stmt.where(Producto.nombre.ilike(f"%{nombre}%"))
+    if min_stock is not None:
+        stmt = stmt.where(Producto.stock >= min_stock)
+    res = await db.execute(stmt)
+    return res.scalars().all()
 
-@router.get("/{producto_id}", response_model=ProductoRead)
-def obtener_producto(producto_id: int, db: Session = Depends(get_db)):
-    p = db.get(Producto, producto_id)
-    if not p: raise HTTPException(404, "Producto no encontrado")
-    return p
+@router.get("/{producto_id}", response_model=schemas.ProductoRead)
+async def obtener_producto(producto_id: int, db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(Producto).where(Producto.id == producto_id))
+    obj = res.scalar_one_or_none()
+    if not obj:
+        raise HTTPException(404, "Producto no encontrado")
+    return obj
 
 @router.get("/{producto_id}/precio")
-def precio_para_cantidad(producto_id: int, cantidad: int = 1, db: Session = Depends(get_db)):
-    p = db.get(Producto, producto_id)
-    if not p: raise HTTPException(404, "Producto no encontrado")
-    if cantidad <= 0: raise HTTPException(400, "Cantidad debe ser > 0")
+async def precio_para_cantidad(producto_id: int, cantidad: int = 1, db: AsyncSession = Depends(get_db)):
+    if cantidad <= 0:
+        raise HTTPException(400, "Cantidad debe ser > 0")
+    res = await db.execute(select(Producto).where(Producto.id == producto_id))
+    p = res.scalar_one_or_none()
+    if not p:
+        raise HTTPException(404, "Producto no encontrado")
 
     precio_unit = p.valor_unitario
     umbral = p.umbral_mayor or 20
@@ -44,31 +51,47 @@ def precio_para_cantidad(producto_id: int, cantidad: int = 1, db: Session = Depe
         "cantidad": cantidad,
         "umbral_mayor": umbral,
         "precio_unitario_aplicado": float(precio_unit),
-        "total": round(total, 2)
+        "total": round(total, 2),
     }
 
-@router.post("/", response_model=ProductoRead, status_code=201)
-def crear_producto(data: ProductoCreate, db: Session = Depends(get_db)):
-    p = Producto(**data.model_dump())
-    db.add(p)
-    try:
-        db.commit(); db.refresh(p)
-        return p
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(409, "Violación de unicidad en producto")
+@router.post("/", response_model=schemas.ProductoRead, status_code=status.HTTP_201_CREATED)
+async def crear_producto(payload: schemas.ProductoCreate, db: AsyncSession = Depends(get_db)):
+    # valida FK categoría si envían categoria_id
+    if payload.categoria_id is not None:
+        res_cat = await db.execute(select(Categoria).where(Categoria.id == payload.categoria_id))
+        if not res_cat.scalar_one_or_none():
+            raise HTTPException(404, "Categoría no existe")
+    obj = Producto(**payload.model_dump())
+    db.add(obj)
+    await db.commit()
+    await db.refresh(obj)
+    return obj
 
-@router.put("/{producto_id}", response_model=ProductoRead)
-def actualizar_producto(producto_id: int, data: ProductoUpdate, db: Session = Depends(get_db)):
-    p = db.get(Producto, producto_id)
-    if not p: raise HTTPException(404, "Producto no encontrado")
-    for k, v in data.model_dump(exclude_unset=True).items():
-        setattr(p, k, v)
-    db.commit(); db.refresh(p)
-    return p
+@router.put("/{producto_id}", response_model=schemas.ProductoRead)
+async def actualizar_producto(producto_id: int, payload: schemas.ProductoUpdate, db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(Producto).where(Producto.id == producto_id))
+    obj = res.scalar_one_or_none()
+    if not obj:
+        raise HTTPException(404, "Producto no encontrado")
 
-@router.delete("/{producto_id}", status_code=204)
-def borrar_producto(producto_id: int, db: Session = Depends(get_db)):
-    p = db.get(Producto, producto_id)
-    if not p: raise HTTPException(404, "Producto no encontrado")
-    db.delete(p); db.commit()
+    data = payload.model_dump(exclude_none=True)
+    if "categoria_id" in data and data["categoria_id"] is not None:
+        res_cat = await db.execute(select(Categoria).where(Categoria.id == data["categoria_id"]))
+        if not res_cat.scalar_one_or_none():
+            raise HTTPException(404, "Categoría no existe")
+
+    for k, v in data.items():
+        setattr(obj, k, v)
+
+    await db.commit()
+    await db.refresh(obj)
+    return obj
+
+@router.delete("/{producto_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def borrar_producto(producto_id: int, db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(Producto).where(Producto.id == producto_id))
+    obj = res.scalar_one_or_none()
+    if not obj:
+        raise HTTPException(404, "Producto no encontrado")
+    await db.delete(obj)
+    await db.commit()
