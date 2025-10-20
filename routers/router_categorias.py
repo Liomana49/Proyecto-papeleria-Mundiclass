@@ -10,7 +10,7 @@ import schemas
 router = APIRouter(prefix="/categorias", tags=["Categorias"])
 
 async def log_delete(db: AsyncSession, tabla: str, registro_id: int, descripcion: str | None = None):
-    h = HistorialEliminados(tabla=tabla, registro_id=registro_id, descripcion=descripcion or "", fecha_eliminado=datetime.utcnow())
+    h = HistorialEliminados(tabla=tabla, registro_id=registro_id, datos=descripcion or "", eliminado_en=datetime.utcnow())
     db.add(h)
 
 @router.get("/", response_model=List[schemas.CategoriaRead])
@@ -52,6 +52,6 @@ async def historial_categorias_eliminadas(db: AsyncSession = Depends(get_db)):
     res = await db.execute(
         select(HistorialEliminados)
         .where(HistorialEliminados.tabla == "Categoria")
-        .order_by(HistorialEliminados.fecha_eliminado.desc())
+        .order_by(HistorialEliminados.eliminado_en.desc())
     )
     return res.scalars().all()

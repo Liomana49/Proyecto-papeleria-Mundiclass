@@ -76,6 +76,6 @@ class HistorialRead(BaseModel):
     id: int
     tabla: str
     registro_id: int
-    descripcion: Optional[str]
-    fecha_eliminado: datetime
+    datos: Optional[str]
+    eliminado_en: datetime
     class Config: orm_mode = True
