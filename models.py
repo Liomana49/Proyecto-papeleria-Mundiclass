@@ -37,7 +37,10 @@ class Cliente(Base):
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
     creado_en = Column(DateTime(timezone=True), default=func.now(), server_default=func.now(), nullable=False)
 
-    usuario = r
+    # 🔧 ESTA LÍNEA ES LA CORRECTA
+    usuario = relationship("Usuario", back_populates="clientes")
+    compras = relationship("Compra", back_populates="cliente")
+
 
 
 
