@@ -4,7 +4,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from database import async_engine as engine, Base
+from database import engine, Base
+
 
 
 # Importación correcta de tus routers según tus archivos reales
