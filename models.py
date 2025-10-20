@@ -46,6 +46,7 @@ class Categoria(Base):
     nombre = Column(String(120), nullable=False, index=True)
     codigo = Column(String(30), nullable=True, index=True)
     creado_en = Column(DateTime(timezone=True), default=func.now(), server_default=func.now(), nullable=False)
+    actualizado_en = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now(), nullable=False)
 
     productos = relationship("Producto", back_populates="categoria")
 
