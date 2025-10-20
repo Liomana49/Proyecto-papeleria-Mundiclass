@@ -16,9 +16,9 @@ async def log_delete(db: AsyncSession, tabla: str, registro_id: int, descripcion
         registro_id=registro_id,
         datos={
             "descripcion": descripcion or "",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         },
-        # eliminado_en tiene server_default=now(); lo dejamos que DB lo ponga
+        # eliminado_en tiene server_default=now(); lo pone la DB
     )
     db.add(h)
 
@@ -34,11 +34,9 @@ async def listar_usuarios(
     if rol:
         conds.append(Usuario.rol == rol)
     if cedula:
-        # cedula es opcional en Usuario; si no la usas, elimina esta línea
-        conds.append(Usuario.cedula == cedula)
+        conds.append(Usuario.cedula == cedula)  # cedula es opcional en Usuario
     if correo:
         conds.append(Usuario.correo == correo)
-
     if conds:
         stmt = stmt.where(and_(*conds))
 
@@ -60,7 +58,7 @@ async def crear_usuario(payload: schemas.UsuarioCreate, db: AsyncSession = Depen
     if q_correo.scalar_one_or_none():
         raise HTTPException(status_code=409, detail="Correo ya registrado")
 
-    # Validar cédula si viene en el payload y existe en el modelo
+    # Validar cédula si viene en el payload
     if getattr(payload, "cedula", None) is not None:
         q_ced = await db.execute(select(Usuario).where(Usuario.cedula == payload.cedula))
         if q_ced.scalar_one_or_none():
@@ -83,5 +81,52 @@ async def actualizar_usuario(usuario_id: int, payload: schemas.UsuarioUpdate, db
 
     # Unicidad de correo si cambia
     if "correo" in data:
-        q = await db.execute(select(Usuario).where(Usuario.correo == data["correo"], Usuario.id != usuario_id))
-        if q.s
+        q = await db.execute(
+            select(Usuario).where(Usuario.correo == data["correo"], Usuario.id != usuario_id)
+        )
+        if q.scalar_one_or_none():
+            raise HTTPException(status_code=409, detail="Ya existe otro usuario con ese correo")
+
+    # Unicidad de cédula si cambia
+    if "cedula" in data:
+        q = await db.execute(
+            select(Usuario).where(Usuario.cedula == data["cedula"], Usuario.id != usuario_id)
+        )
+        if q.scalar_one_or_none():
+            raise HTTPException(status_code=409, detail="Ya existe otro usuario con esa cédula")
+
+    for k, v in data.items():
+        setattr(obj, k, v)
+
+    await db.commit()
+    await db.refresh(obj)
+    return obj
+
+@router.delete("/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def borrar_usuario(usuario_id: int, db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(Usuario).where(Usuario.id == usuario_id))
+    obj = res.scalar_one_or_none()
+    if not obj:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    await log_delete(db, "Usuario", obj.id, f"Usuario {obj.nombre} eliminado")
+    await db.delete(obj)
+    await db.commit()
+
+@router.get("/historial/eliminados", response_model=List[dict])
+async def historial_usuarios_eliminados(db: AsyncSession = Depends(get_db)):
+    res = await db.execute(
+        select(HistorialEliminados)
+        .where(HistorialEliminados.tabla == "Usuario")
+        .order_by(HistorialEliminados.eliminado_en.desc())
+    )
+    items = []
+    for h in res.scalars().all():
+        items.append({
+            "id": h.id,
+            "tabla": h.tabla,
+            "registro_id": h.registro_id,
+            "datos": h.datos,
+            "eliminado_en": h.eliminado_en,
+        })
+    return items
