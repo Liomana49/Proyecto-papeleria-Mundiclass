@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from models import Categoria, HistorialEliminados
-import schemas
+import schemas 
 
 router = APIRouter(prefix="/categorias", tags=["Categorias"])
 
