@@ -1,16 +1,27 @@
 from typing import List, Optional
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
-from database import get_db
+
+from database import get_db  # ajusta si tu función se llama distinto
 from models import Usuario, HistorialEliminados
 import schemas
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
+# -----------------------------
+# Helper de historial de eliminados
+# -----------------------------
 async def log_delete(db: AsyncSession, tabla: str, registro_id: int, descripcion: str | None = None):
-    # HistorialEliminados espera: tabla, registro_id, datos(JSONB), eliminado_en
+    """
+    Registra en historial_eliminados con estructura consistente:
+    - tabla: str
+    - registro_id: int
+    - datos: JSONB (dict)
+    - eliminado_en: lo establece la DB via server_default=now()
+    """
     h = HistorialEliminados(
         tabla=tabla,
         registro_id=registro_id,
@@ -18,10 +29,13 @@ async def log_delete(db: AsyncSession, tabla: str, registro_id: int, descripcion
             "descripcion": descripcion or "",
             "timestamp": datetime.utcnow().isoformat(),
         },
-        # eliminado_en tiene server_default=now(); lo pone la DB
+        # eliminado_en: lo pone la DB (server_default)
     )
     db.add(h)
 
+# -----------------------------
+# Listar usuarios (con filtros opcionales)
+# -----------------------------
 @router.get("/", response_model=List[schemas.UsuarioRead])
 async def listar_usuarios(
     rol: Optional[str] = Query(None, description="Filtra por rol: administrador/cliente"),
@@ -34,7 +48,7 @@ async def listar_usuarios(
     if rol:
         conds.append(Usuario.rol == rol)
     if cedula:
-        conds.append(Usuario.cedula == cedula)  # cedula es opcional en Usuario
+        conds.append(Usuario.cedula == cedula)  # cédula es opcional en Usuario
     if correo:
         conds.append(Usuario.correo == correo)
     if conds:
@@ -43,6 +57,9 @@ async def listar_usuarios(
     res = await db.execute(stmt)
     return res.scalars().all()
 
+# -----------------------------
+# Obtener usuario por ID
+# -----------------------------
 @router.get("/{usuario_id}", response_model=schemas.UsuarioRead)
 async def obtener_usuario(usuario_id: int, db: AsyncSession = Depends(get_db)):
     res = await db.execute(select(Usuario).where(Usuario.id == usuario_id))
@@ -51,6 +68,9 @@ async def obtener_usuario(usuario_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return obj
 
+# -----------------------------
+# Crear usuario
+# -----------------------------
 @router.post("/", response_model=schemas.UsuarioRead, status_code=status.HTTP_201_CREATED)
 async def crear_usuario(payload: schemas.UsuarioCreate, db: AsyncSession = Depends(get_db)):
     # Validar correo único
@@ -64,12 +84,19 @@ async def crear_usuario(payload: schemas.UsuarioCreate, db: AsyncSession = Depen
         if q_ced.scalar_one_or_none():
             raise HTTPException(status_code=409, detail="Cédula ya registrada")
 
-    obj = Usuario(**payload.model_dump())
+    # Compatibilidad Pydantic v1/v2
+    payload_dict = payload.model_dump() if hasattr(payload, "model_dump") else payload.dict()
+
+    # NOTA: si luego encripta contraseñas, hágalo aquí antes de crear el objeto
+    obj = Usuario(**payload_dict)
     db.add(obj)
     await db.commit()
     await db.refresh(obj)
     return obj
 
+# -----------------------------
+# Actualizar usuario
+# -----------------------------
 @router.put("/{usuario_id}", response_model=schemas.UsuarioRead)
 async def actualizar_usuario(usuario_id: int, payload: schemas.UsuarioUpdate, db: AsyncSession = Depends(get_db)):
     res = await db.execute(select(Usuario).where(Usuario.id == usuario_id))
@@ -77,7 +104,7 @@ async def actualizar_usuario(usuario_id: int, payload: schemas.UsuarioUpdate, db
     if not obj:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    data = payload.model_dump(exclude_none=True)
+    data = payload.model_dump(exclude_none=True) if hasattr(payload, "model_dump") else payload.dict(exclude_none=True)
 
     # Unicidad de correo si cambia
     if "correo" in data:
@@ -102,6 +129,9 @@ async def actualizar_usuario(usuario_id: int, payload: schemas.UsuarioUpdate, db
     await db.refresh(obj)
     return obj
 
+# -----------------------------
+# Eliminar usuario (con historial)
+# -----------------------------
 @router.delete("/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def borrar_usuario(usuario_id: int, db: AsyncSession = Depends(get_db)):
     res = await db.execute(select(Usuario).where(Usuario.id == usuario_id))
@@ -112,7 +142,11 @@ async def borrar_usuario(usuario_id: int, db: AsyncSession = Depends(get_db)):
     await log_delete(db, "Usuario", obj.id, f"Usuario {obj.nombre} eliminado")
     await db.delete(obj)
     await db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+# -----------------------------
+# Historial de usuarios eliminados
+# -----------------------------
 @router.get("/historial/eliminados", response_model=List[dict])
 async def historial_usuarios_eliminados(db: AsyncSession = Depends(get_db)):
     res = await db.execute(
