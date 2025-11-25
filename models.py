@@ -1,4 +1,14 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, func
+# models.py
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Float,
+    DateTime,
+    ForeignKey,
+    Boolean,
+    func,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 from database import Base
@@ -12,13 +22,30 @@ class Usuario(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     nombre = Column(String(120), nullable=False)
     correo = Column(String(120), unique=True, nullable=False)
-    contraseña = Column(String(120), nullable=False)  # si prefieres evita la ñ y usa 'contrasena'
-    rol = Column(String(50), nullable=False)  # administrador o cliente
-    cedula = Column(String(20), unique=True, nullable=True, index=True)
+    # usa 'contrasena' para evitar problemas con la ñ en JSON/código
+    contrasena = Column(String(255), nullable=False)
+    rol = Column(String(50), nullable=False)  # administrador / cliente
 
-    creado_en = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    # Datos comerciales
+    cedula = Column(String(20), unique=True, nullable=False)
+    tipo = Column(String(20), nullable=True)  # mayorista / minorista
+    cliente_frecuente = Column(Boolean, nullable=False, default=False)
 
+    creado_en = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    actualizado_en = Column(
+        DateTime(timezone=True),
+        default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    # Relaciones
     clientes = relationship("Cliente", back_populates="usuario")
+
 
 # -----------------------------
 # MODELO: CLIENTE
@@ -29,13 +56,22 @@ class Cliente(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     nombre = Column(String(120), nullable=False)
     cedula = Column(String(20), unique=True, nullable=False)
-    tipo_cliente = Column(String(20), nullable=False)            # mayorista o minorista
-    cliente_frecuente = Column(String(10), nullable=False, default="no")  # "si" / "no"
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
-    creado_en = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
+    tipo_cliente = Column(String(20), nullable=True)  # mayorista / minorista
+    cliente_frecuente = Column(Boolean, nullable=False, default=False)
+
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
+
+    creado_en = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    # Relaciones
     usuario = relationship("Usuario", back_populates="clientes")
     compras = relationship("Compra", back_populates="cliente")
+
 
 # -----------------------------
 # MODELO: CATEGORIA
@@ -46,10 +82,22 @@ class Categoria(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     nombre = Column(String(120), nullable=False, index=True)
     codigo = Column(String(30), nullable=True, index=True)
-    creado_en = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    actualizado_en = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now(), nullable=False)
 
+    creado_en = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    actualizado_en = Column(
+        DateTime(timezone=True),
+        default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    # Relaciones
     productos = relationship("Producto", back_populates="categoria")
+
 
 # -----------------------------
 # MODELO: PRODUCTO
@@ -59,15 +107,30 @@ class Producto(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     nombre = Column(String(120), nullable=False, index=True)
-    descripcion = Column(String(250))
+    descripcion = Column(String(250), nullable=True)
+
     cantidad = Column(Integer, nullable=False, default=0)
     valor_unitario = Column(Float, nullable=False)
     valor_mayorista = Column(Float, nullable=True)
-    categoria_id = Column(Integer, ForeignKey("categorias.id"))
-    creado_en = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
+    categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=True)
+
+    creado_en = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    actualizado_en = Column(
+        DateTime(timezone=True),
+        default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    # Relaciones
     categoria = relationship("Categoria", back_populates="productos")
     compras = relationship("Compra", back_populates="producto")
+
 
 # -----------------------------
 # MODELO: COMPRA
@@ -76,14 +139,26 @@ class Compra(Base):
     __tablename__ = "compras"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    cliente_id = Column(Integer, ForeignKey("clientes.id"))
-    producto_id = Column(Integer, ForeignKey("productos.id"))
-    cantidad = Column(Integer, nullable=False)
-    total = Column(Float, nullable=False)
-    creado_en = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
+    cliente_id = Column(Integer, ForeignKey("clientes.id"), nullable=False)
+    producto_id = Column(Integer, ForeignKey("productos.id"), nullable=False)
+
+    cantidad = Column(Integer, nullable=False, default=1)
+
+    # Precio que realmente se aplicó (unitario) y total
+    precio_unitario_aplicado = Column(Float, nullable=False)
+    total = Column(Float, nullable=False)
+
+    fecha = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    # Relaciones
     cliente = relationship("Cliente", back_populates="compras")
     producto = relationship("Producto", back_populates="compras")
+
 
 # -----------------------------
 # HISTORIAL DE ELIMINADOS
@@ -92,10 +167,19 @@ class HistorialEliminados(Base):
     __tablename__ = "historial_eliminados"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+
+    # nombre de la tabla afectada (usuarios, productos, etc.)
     tabla = Column(String(50), nullable=False)
+    # id del registro eliminado en esa tabla
     registro_id = Column(Integer, nullable=False)
-    datos = Column(JSONB, nullable=False, default=dict)  # snapshot en JSONB
-    eliminado_en = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    # snapshot en JSONB (Supabase/Postgres lo soporta sin problema)
+    datos = Column(JSONB, nullable=False, default=dict)
+
+    eliminado_en = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
 
 
 

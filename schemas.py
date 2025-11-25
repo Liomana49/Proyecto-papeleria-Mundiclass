@@ -1,39 +1,48 @@
-# schemas.py (Pydantic v2)
+# schemas.py
 from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Optional
 from datetime import datetime
 
-# ---------------- USUARIO ----------------
+# ==========================
+# ------- USUARIO ----------
+# ==========================
 class UsuarioBase(BaseModel):
     nombre: str
     correo: EmailStr
     rol: str                       # "administrador" / "cliente"
-    cedula: Optional[str] = None   # en modelo es nullable=True
+    cedula: str                    # única
+    tipo: Optional[str] = None     # mayorista / minorista
+    cliente_frecuente: bool = False
 
 class UsuarioCreate(UsuarioBase):
-    # usa 'contrasena' si prefieres evitar la ñ en JSON; tu modelo es 'contraseña'
-    contraseña: str
+    contrasena: str
 
 class UsuarioUpdate(BaseModel):
-    # todo opcional para updates parciales
     nombre: Optional[str] = None
     correo: Optional[EmailStr] = None
     rol: Optional[str] = None
     cedula: Optional[str] = None
-    contraseña: Optional[str] = None
+    tipo: Optional[str] = None
+    cliente_frecuente: Optional[bool] = None
+    contrasena: Optional[str] = None
 
 class UsuarioRead(UsuarioBase):
     id: int
     creado_en: datetime
+    actualizado_en: datetime
+
     model_config = ConfigDict(from_attributes=True)
 
-# ---------------- CLIENTE ----------------
+
+# ==========================
+# ------- CLIENTE ----------
+# ==========================
 class ClienteBase(BaseModel):
     nombre: str
     cedula: str
-    tipo_cliente: str                   # "mayorista" / "minorista"
-    cliente_frecuente: str = "no"       # "si" / "no"
-    usuario_id: Optional[int] = None    # FK opcional según tu modelo
+    tipo_cliente: Optional[str] = None    # mayorista / minorista
+    cliente_frecuente: bool = False
+    usuario_id: Optional[int] = None
 
 class ClienteCreate(ClienteBase):
     pass
@@ -42,15 +51,19 @@ class ClienteUpdate(BaseModel):
     nombre: Optional[str] = None
     cedula: Optional[str] = None
     tipo_cliente: Optional[str] = None
-    cliente_frecuente: Optional[str] = None
+    cliente_frecuente: Optional[bool] = None
     usuario_id: Optional[int] = None
 
 class ClienteRead(ClienteBase):
     id: int
     creado_en: datetime
+
     model_config = ConfigDict(from_attributes=True)
 
-# ---------------- CATEGORIA ----------------
+
+# ==========================
+# ------ CATEGORÍA ---------
+# ==========================
 class CategoriaBase(BaseModel):
     nombre: str
     codigo: Optional[str] = None
@@ -66,9 +79,13 @@ class CategoriaRead(CategoriaBase):
     id: int
     creado_en: datetime
     actualizado_en: datetime
+
     model_config = ConfigDict(from_attributes=True)
 
-# ---------------- PRODUCTO ----------------
+
+# ==========================
+# ------- PRODUCTO ---------
+# ==========================
 class ProductoBase(BaseModel):
     nombre: str
     descripcion: Optional[str] = None
@@ -91,28 +108,46 @@ class ProductoUpdate(BaseModel):
 class ProductoRead(ProductoBase):
     id: int
     creado_en: datetime
+    actualizado_en: datetime
+
     model_config = ConfigDict(from_attributes=True)
 
-# ---------------- COMPRA ----------------
+
+# ==========================
+# -------- COMPRA ----------
+# ==========================
 class CompraBase(BaseModel):
     cliente_id: int
     producto_id: int
     cantidad: int
+    precio_unitario_aplicado: float
     total: float
 
 class CompraCreate(CompraBase):
     pass
 
+class CompraUpdate(BaseModel):
+    cliente_id: Optional[int] = None
+    producto_id: Optional[int] = None
+    cantidad: Optional[int] = None
+    precio_unitario_aplicado: Optional[float] = None
+    total: Optional[float] = None
+
 class CompraRead(CompraBase):
     id: int
-    creado_en: datetime
+    fecha: datetime
+
     model_config = ConfigDict(from_attributes=True)
 
-# ---------------- HISTORIAL ----------------
+
+# ==========================
+# ---- HISTORIAL DELETE ----
+# ==========================
 class HistorialEliminadoRead(BaseModel):
     id: int
     tabla: str
     registro_id: int
-    datos: dict                    # JSONB -> dict
+    datos: dict
     eliminado_en: datetime
+
     model_config = ConfigDict(from_attributes=True)
