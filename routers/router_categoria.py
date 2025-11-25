@@ -130,7 +130,7 @@ async def subir_imagen_categoria(
             detail="El archivo debe ser una imagen (jpg, png, etc.)",
         )
 
-    url_publica = await upload_image_to_supabase(archivo, bucket_name="categorias")
+    url_publica = await upload_image_to_supabase(archivo, bucket_name="Mundiclass")
 
     # Optionally, update categoria with imagen_url here if schema/model supports it
     # categoria.imagen_url = url_publica
