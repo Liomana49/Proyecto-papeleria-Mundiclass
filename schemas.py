@@ -1,7 +1,40 @@
 # schemas.py
 from pydantic import BaseModel, EmailStr, ConfigDict
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
+
+
+# -----------------------------
+# MODELO: MULTIMEDIA
+# -----------------------------
+class MultimediaBase(BaseModel):
+    url: str
+    media_type: str  # image, video, audio, etc.
+    description: Optional[str] = None
+
+
+class MultimediaCreate(MultimediaBase):
+    model_type: str
+    model_id: int
+
+
+class MultimediaUpdate(BaseModel):
+    url: Optional[str] = None
+    media_type: Optional[str] = None
+    description: Optional[str] = None
+    model_type: Optional[str] = None
+    model_id: Optional[int] = None
+
+
+class MultimediaRead(MultimediaBase):
+    id: int
+    model_type: str
+    model_id: int
+    creado_en: datetime
+    actualizado_en: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
 
 # ==========================
 # ------- USUARIO ----------
@@ -14,8 +47,10 @@ class UsuarioBase(BaseModel):
     tipo: Optional[str] = None     # mayorista / minorista
     cliente_frecuente: bool = False
 
+
 class UsuarioCreate(UsuarioBase):
     contrasena: str
+
 
 class UsuarioUpdate(BaseModel):
     nombre: Optional[str] = None
@@ -26,10 +61,12 @@ class UsuarioUpdate(BaseModel):
     cliente_frecuente: Optional[bool] = None
     contrasena: Optional[str] = None
 
+
 class UsuarioRead(UsuarioBase):
     id: int
     creado_en: datetime
     actualizado_en: datetime
+    multimedia: Optional[List[MultimediaRead]] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -44,8 +81,10 @@ class ClienteBase(BaseModel):
     cliente_frecuente: bool = False
     usuario_id: Optional[int] = None
 
+
 class ClienteCreate(ClienteBase):
     pass
+
 
 class ClienteUpdate(BaseModel):
     nombre: Optional[str] = None
@@ -54,9 +93,11 @@ class ClienteUpdate(BaseModel):
     cliente_frecuente: Optional[bool] = None
     usuario_id: Optional[int] = None
 
+
 class ClienteRead(ClienteBase):
     id: int
     creado_en: datetime
+    multimedia: Optional[List[MultimediaRead]] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -67,18 +108,24 @@ class ClienteRead(ClienteBase):
 class CategoriaBase(BaseModel):
     nombre: str
     codigo: Optional[str] = None
+    imagen_url: Optional[str] = None   # 👈 aquí viajamos la URL de la imagen
+
 
 class CategoriaCreate(CategoriaBase):
     pass
 
+
 class CategoriaUpdate(BaseModel):
     nombre: Optional[str] = None
     codigo: Optional[str] = None
+    imagen_url: Optional[str] = None   # 👈 para actualizar si quieres
+
 
 class CategoriaRead(CategoriaBase):
     id: int
     creado_en: datetime
     actualizado_en: datetime
+    multimedia: Optional[List[MultimediaRead]] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -94,8 +141,10 @@ class ProductoBase(BaseModel):
     valor_mayorista: Optional[float] = None
     categoria_id: Optional[int] = None
 
+
 class ProductoCreate(ProductoBase):
     pass
+
 
 class ProductoUpdate(BaseModel):
     nombre: Optional[str] = None
@@ -105,10 +154,12 @@ class ProductoUpdate(BaseModel):
     valor_mayorista: Optional[float] = None
     categoria_id: Optional[int] = None
 
+
 class ProductoRead(ProductoBase):
     id: int
     creado_en: datetime
     actualizado_en: datetime
+    multimedia: Optional[List[MultimediaRead]] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -123,8 +174,10 @@ class CompraBase(BaseModel):
     precio_unitario_aplicado: float
     total: float
 
+
 class CompraCreate(CompraBase):
     pass
+
 
 class CompraUpdate(BaseModel):
     cliente_id: Optional[int] = None
@@ -133,9 +186,11 @@ class CompraUpdate(BaseModel):
     precio_unitario_aplicado: Optional[float] = None
     total: Optional[float] = None
 
+
 class CompraRead(CompraBase):
     id: int
     fecha: datetime
+    multimedia: Optional[List[MultimediaRead]] = []
 
     model_config = ConfigDict(from_attributes=True)
 

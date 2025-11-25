@@ -1,5 +1,4 @@
 from typing import List, Optional
-from datetime import datetime
 import os
 from uuid import uuid4
 
@@ -13,50 +12,21 @@ from fastapi import (
     UploadFile,
     File,
 )
-from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
-from models import Categoria, HistorialEliminados
 import schemas
+import crud
 
 router = APIRouter(prefix="/categorias", tags=["Categorias"])
 
-
-async def log_delete(
-    db: AsyncSession,
-    tabla: str,
-    registro_id: int,
-    descripcion: str | None = None,
-):
-    h = HistorialEliminados(
-        tabla=tabla,
-        registro_id=registro_id,
-        datos={
-            "descripcion": descripcion or "",
-            "timestamp": datetime.utcnow().isoformat(),
-        },
-    )
-    db.add(h)
-
-
 @router.get("/", response_model=List[schemas.CategoriaRead])
 async def listar_categorias(
-    nombre: Optional[str] = Query(None),
-    codigo: Optional[str] = Query(None),
+    nombre: Optional[str] = None,
+    codigo: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(Categoria)
-    conds = []
-    if nombre:
-        conds.append(Categoria.nombre == nombre)
-    if codigo:
-        conds.append(Categoria.codigo == codigo)
-    if conds:
-        stmt = stmt.where(and_(*conds))
-    res = await db.execute(stmt)
-    return res.scalars().all()
-
+    return await crud.listar_categorias(db)
 
 @router.post(
     "/",
@@ -67,12 +37,7 @@ async def crear_categoria(
     payload: schemas.CategoriaCreate,
     db: AsyncSession = Depends(get_db),
 ):
-    obj = Categoria(**payload.model_dump())
-    db.add(obj)
-    await db.commit()
-    await db.refresh(obj)
-    return obj
-
+    return await crud.crear_categoria(db, payload)
 
 @router.put("/{categoria_id}", response_model=schemas.CategoriaRead)
 async def actualizar_categoria(
@@ -80,34 +45,20 @@ async def actualizar_categoria(
     payload: schemas.CategoriaUpdate,
     db: AsyncSession = Depends(get_db),
 ):
-    res = await db.execute(select(Categoria).where(Categoria.id == categoria_id))
-    obj = res.scalar_one_or_none()
-    if not obj:
-        raise HTTPException(status_code=404, detail="Categoría no encontrada")
-
-    for k, v in payload.model_dump(exclude_none=True).items():
-        setattr(obj, k, v)
-
-    await db.commit()
-    await db.refresh(obj)
-    return obj
-
+    return await crud.actualizar_categoria(db, categoria_id, payload)
 
 @router.delete("/{categoria_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def eliminar_categoria(
     categoria_id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    res = await db.execute(select(Categoria).where(Categoria.id == categoria_id))
-    obj = res.scalar_one_or_none()
-    if not obj:
-        raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    categoria = await crud.obtener_categoria(db, categoria_id)
 
-    await log_delete(db, "Categoria", obj.id, f"Categoría '{obj.nombre}' eliminada")
-    await db.delete(obj)
-    await db.commit()
+    descripcion = f"Categoría '{categoria.nombre}' eliminada"
+
+    await crud._registrar_eliminado(db, "categorias", categoria.id, {"nombre": categoria.nombre})
+    await crud.borrar_categoria(db, categoria_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
 
 @router.get(
     "/historial/eliminados",
@@ -116,13 +67,7 @@ async def eliminar_categoria(
 async def historial_categorias_eliminadas(
     db: AsyncSession = Depends(get_db),
 ):
-    res = await db.execute(
-        select(HistorialEliminados)
-        .where(HistorialEliminados.tabla == "Categoria")
-        .order_by(HistorialEliminados.eliminado_en.desc())
-    )
-    return res.scalars().all()
-
+    return await crud.listar_historial(db)
 
 # ==========================
 #   SUBIR IMAGEN CATEGORÍA
@@ -133,37 +78,30 @@ async def subir_imagen_categoria(
     archivo: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ):
-    # 1) Verificar que la categoría exista
-    res = await db.execute(select(Categoria).where(Categoria.id == categoria_id))
-    categoria = res.scalar_one_or_none()
+    categoria = await crud.obtener_categoria(db, categoria_id)
     if not categoria:
         raise HTTPException(status_code=404, detail="Categoría no encontrada")
 
-    # 2) Validar que el archivo sea imagen
     if not archivo.content_type or not archivo.content_type.startswith("image/"):
         raise HTTPException(
             status_code=400,
             detail="El archivo debe ser una imagen (jpg, png, etc.)",
         )
 
-    # 3) Carpeta donde se guardan las imágenes
     carpeta = "static/categorias"
     os.makedirs(carpeta, exist_ok=True)
 
-    # 4) Construir nombre de archivo único
     extension = os.path.splitext(archivo.filename or "")[1] or ".jpg"
     nombre_archivo = f"cat_{categoria_id}_{uuid4().hex}{extension}"
     ruta_fisica = os.path.join(carpeta, nombre_archivo)
 
-    # 5) Guardar archivo en disco
     contenido = await archivo.read()
     with open(ruta_fisica, "wb") as f:
         f.write(contenido)
 
-    # 6) URL pública (asumiendo que montas /static en main.py)
     url_publica = f"/static/categorias/{nombre_archivo}"
 
-    # Si luego agregas un campo imagen_url en Categoria, aquí lo podrías guardar:
+    # Optionally, update categoria with imagen_url here if schema/model supports it
     # categoria.imagen_url = url_publica
     # await db.commit()
     # await db.refresh(categoria)

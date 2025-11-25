@@ -13,6 +13,35 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 from database import Base
 
+
+# -----------------------------
+# MODELO: MULTIMEDIA
+# -----------------------------
+class Multimedia(Base):
+    __tablename__ = "multimedia"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    url = Column(String(255), nullable=False)
+    media_type = Column(String(50), nullable=False)  # image, video, audio, etc.
+    description = Column(String(255), nullable=True)
+
+    model_type = Column(String(50), nullable=False)  # Which model owns this multimedia: Usuario, Cliente, etc.
+    model_id = Column(Integer, nullable=False)  # The primary key of the owning model instance
+
+    creado_en = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    actualizado_en = Column(
+        DateTime(timezone=True),
+        default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+
 # -----------------------------
 # MODELO: USUARIO
 # -----------------------------
@@ -45,6 +74,11 @@ class Usuario(Base):
 
     # Relaciones
     clientes = relationship("Cliente", back_populates="usuario")
+    multimedia = relationship(
+        "Multimedia",
+        primaryjoin="and_(Multimedia.model_id==Usuario.id, Multimedia.model_type=='Usuario')",
+        viewonly=True,
+    )
 
 
 # -----------------------------
@@ -71,6 +105,11 @@ class Cliente(Base):
     # Relaciones
     usuario = relationship("Usuario", back_populates="clientes")
     compras = relationship("Compra", back_populates="cliente")
+    multimedia = relationship(
+        "Multimedia",
+        primaryjoin="and_(Multimedia.model_id==Cliente.id, Multimedia.model_type=='Cliente')",
+        viewonly=True,
+    )
 
 
 # -----------------------------
@@ -82,6 +121,9 @@ class Categoria(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     nombre = Column(String(120), nullable=False, index=True)
     codigo = Column(String(30), nullable=True, index=True)
+
+    # 👇 NUEVO: URL de la imagen asociada a la categoría
+    imagen_url = Column(String(255), nullable=True)
 
     creado_en = Column(
         DateTime(timezone=True),
@@ -97,6 +139,11 @@ class Categoria(Base):
 
     # Relaciones
     productos = relationship("Producto", back_populates="categoria")
+    multimedia = relationship(
+        "Multimedia",
+        primaryjoin="and_(Multimedia.model_id==Categoria.id, Multimedia.model_type=='Categoria')",
+        viewonly=True,
+    )
 
 
 # -----------------------------
@@ -130,6 +177,11 @@ class Producto(Base):
     # Relaciones
     categoria = relationship("Categoria", back_populates="productos")
     compras = relationship("Compra", back_populates="producto")
+    multimedia = relationship(
+        "Multimedia",
+        primaryjoin="and_(Multimedia.model_id==Producto.id, Multimedia.model_type=='Producto')",
+        viewonly=True,
+    )
 
 
 # -----------------------------
@@ -158,6 +210,11 @@ class Compra(Base):
     # Relaciones
     cliente = relationship("Cliente", back_populates="compras")
     producto = relationship("Producto", back_populates="compras")
+    multimedia = relationship(
+        "Multimedia",
+        primaryjoin="and_(Multimedia.model_id==Compra.id, Multimedia.model_type=='Compra')",
+        viewonly=True,
+    )
 
 
 # -----------------------------
@@ -172,7 +229,7 @@ class HistorialEliminados(Base):
     tabla = Column(String(50), nullable=False)
     # id del registro eliminado en esa tabla
     registro_id = Column(Integer, nullable=False)
-    # snapshot en JSONB (Supabase/Postgres lo soporta sin problema)
+    # snapshot en JSONB (Postgres lo soporta sin problema)
     datos = Column(JSONB, nullable=False, default=dict)
 
     eliminado_en = Column(
@@ -180,8 +237,3 @@ class HistorialEliminados(Base):
         server_default=func.now(),
         nullable=False,
     )
-
-
-
-
-
