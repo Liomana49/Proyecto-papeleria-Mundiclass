@@ -108,7 +108,6 @@ async def subir_imagen_categoria(
 
     return {
         "categoria_id": categoria_id,
-        "filename": nombre_archivo,
-        "imagen_url": url_publica,
+        "filename": nombre_archivo
     }
 
