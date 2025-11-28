@@ -1,4 +1,3 @@
-# utils.py
 import os
 import uuid
 from typing import Optional
@@ -55,8 +54,7 @@ async def upload_image_to_supabase(
         )
 
     # obtener URL pública
-    public_url_response = supabase.storage.from_(BUCKET_NAME).get_public_url(path_in_bucket)
-    public_url = public_url_response.get("publicUrl")
+    public_url = supabase.storage.from_(BUCKET_NAME).get_public_url(path_in_bucket)
     if not public_url:
         raise RuntimeError("No se pudo obtener la URL pública después del upload")
 
