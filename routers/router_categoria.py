@@ -1,5 +1,4 @@
 from typing import List, Optional
-from uuid import uuid4
 
 from fastapi import (
     APIRouter,
@@ -20,13 +19,16 @@ from utils import upload_image_to_supabase
 
 router = APIRouter(prefix="/categorias", tags=["Categorias"])
 
+
 @router.get("/", response_model=List[schemas.CategoriaRead])
 async def listar_categorias(
     nombre: Optional[str] = None,
     codigo: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
 ):
+    # Si tu crud.listar_categorias acepta filtros, pásalos; si no, solo db
     return await crud.listar_categorias(db)
+
 
 @router.post(
     "/",
@@ -39,17 +41,18 @@ async def crear_categoria(
     imagen: Optional[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
 ):
-    # If image present, upload it to Supabase and get public URL
-    url_publica = None
+    # Si hay imagen, la subimos a Supabase y obtenemos la URL pública
+    url_publica: Optional[str] = None
     if imagen:
         if not imagen.content_type or not imagen.content_type.startswith("image/"):
             raise HTTPException(
                 status_code=400,
-                detail="El archivo debe ser una imagen (jpg, png, etc.)"
+                detail="El archivo debe ser una imagen (jpg, png, etc.)",
             )
-        url_publica = await upload_image_to_supabase(imagen, bucket_name="categorias")
+        # 👇 usamos folder="categorias"
+        url_publica = await upload_image_to_supabase(imagen, folder="categorias")
 
-    # Create category instance with imagen_url if available
+    # Construimos el dict de datos para el schema
     data_dict = {"nombre": nombre}
     if codigo:
         data_dict["codigo"] = codigo
@@ -60,6 +63,7 @@ async def crear_categoria(
     categoria = await crud.crear_categoria(db, payload)
     return categoria
 
+
 @router.put("/{categoria_id}", response_model=schemas.CategoriaRead)
 async def actualizar_categoria(
     categoria_id: int,
@@ -68,14 +72,15 @@ async def actualizar_categoria(
     imagen: Optional[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
 ):
-    url_publica = None
+    url_publica: Optional[str] = None
     if imagen:
         if not imagen.content_type or not imagen.content_type.startswith("image/"):
             raise HTTPException(
                 status_code=400,
-                detail="El archivo debe ser una imagen (jpg, png, etc.)"
+                detail="El archivo debe ser una imagen (jpg, png, etc.)",
             )
-        url_publica = await upload_image_to_supabase(imagen, bucket_name="categorias")
+        # 👇 nuevamente folder="categorias"
+        url_publica = await upload_image_to_supabase(imagen, folder="categorias")
 
     update_data = {}
     if nombre is not None:
@@ -89,6 +94,7 @@ async def actualizar_categoria(
     categoria = await crud.actualizar_categoria(db, categoria_id, payload)
     return categoria
 
+
 @router.delete("/{categoria_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def eliminar_categoria(
     categoria_id: int,
@@ -96,11 +102,15 @@ async def eliminar_categoria(
 ):
     categoria = await crud.obtener_categoria(db, categoria_id)
 
-    descripcion = f"Categoría '{categoria.nombre}' eliminada"
-
-    await crud._registrar_eliminado(db, "categorias", categoria.id, {"nombre": categoria.nombre})
+    await crud._registrar_eliminado(
+        db,
+        "categorias",
+        categoria.id,
+        {"nombre": categoria.nombre},
+    )
     await crud.borrar_categoria(db, categoria_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
 
 @router.get(
     "/historial/eliminados",
@@ -110,6 +120,7 @@ async def historial_categorias_eliminadas(
     db: AsyncSession = Depends(get_db),
 ):
     return await crud.listar_historial(db)
+
 
 # ==========================
 #   SUBIR IMAGEN CATEGORÍA
@@ -130,12 +141,13 @@ async def subir_imagen_categoria(
             detail="El archivo debe ser una imagen (jpg, png, etc.)",
         )
 
-    url_publica = await upload_image_to_supabase(archivo, bucket_name="Mundiclass")
+    # 👇 usamos nuevamente folder="categorias"; bucket ya es 'Mundiclass'
+    url_publica = await upload_image_to_supabase(archivo, folder="categorias")
 
-    # Optionally, update categoria with imagen_url here if schema/model supports it
-    # categoria.imagen_url = url_publica
-    # await db.commit()
-    # await db.refresh(categoria)
+    # Si quieres guardar la imagen en la BD también desde este endpoint:
+    # from schemas import CategoriaUpdate
+    # payload = CategoriaUpdate(imagen_url=url_publica)
+    # await crud.actualizar_categoria(db, categoria_id, payload)
 
     return {
         "categoria_id": categoria_id,
