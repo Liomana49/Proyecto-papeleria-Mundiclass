@@ -72,7 +72,7 @@ async def actualizar_categoria(
     imagen: Optional[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
 ):
-    url_publica: Optional[str] = None
+    imagen_url: Optional[str] = None
     if imagen:
         if not imagen.content_type or not imagen.content_type.startswith("image/"):
             raise HTTPException(
@@ -80,17 +80,9 @@ async def actualizar_categoria(
                 detail="El archivo debe ser una imagen (jpg, png, etc.)",
             )
         # 👇 nuevamente folder="categorias"
-        url_publica = await upload_image_to_supabase(imagen, folder="categorias")
+        imagen_url = await upload_image_to_supabase(imagen, folder="categorias")
 
-    update_data = {}
-    if nombre is not None:
-        update_data["nombre"] = nombre
-    if codigo is not None:
-        update_data["codigo"] = codigo
-    if url_publica is not None:
-        update_data["imagen_url"] = url_publica
-
-    payload = schemas.CategoriaUpdate(**update_data)
+    payload = schemas.CategoriaUpdate(nombre=nombre, codigo=codigo, imagen_url=imagen_url)
     categoria = await crud.actualizar_categoria(db, categoria_id, payload)
     return categoria
 

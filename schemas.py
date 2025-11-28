@@ -105,25 +105,21 @@ class ClienteRead(ClienteBase):
 # ==========================
 # ------ CATEGORÍA ---------
 # ==========================
-from fastapi import UploadFile
-from typing import Union
 
 class CategoriaBase(BaseModel):
     nombre: str
     codigo: Optional[str] = None
-    # imagen_url removed because image is uploaded as file
+    imagen_url: Optional[str] = None
 
 
-class CategoriaCreate(BaseModel):
-    nombre: str
-    codigo: Optional[str] = None
-    imagen: Union[UploadFile, None] = None   # Add imagen as file upload type
+class CategoriaCreate(CategoriaBase):
+    pass
 
 
 class CategoriaUpdate(BaseModel):
     nombre: Optional[str] = None
     codigo: Optional[str] = None
-    imagen: Union[UploadFile, None] = None   # Update with file upload option
+    imagen_url: Optional[str] = None
 
 
 class CategoriaRead(CategoriaBase):
