@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
 # ✅ Importa routers (asegúrate de que existan en /routers)
 from routers.router_usuario import router as usuarios_router
@@ -9,6 +10,21 @@ from routers.router_compra import router as compras_router
 from routers.router_categoria import router as categorias_router
 from routers.router_historial import router as historial_router
 
+from database import engine, Base
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Crear tablas si no existen
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("✔ Tablas creadas correctamente.")
+    except Exception as e:
+        print("⚠ Error al crear tablas:", e)
+    yield
+    # Shutdown: Nada por ahora
+
 
 app = FastAPI(
     title="Inventario / Ventas API",
@@ -17,6 +33,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
