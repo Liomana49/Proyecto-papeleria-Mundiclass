@@ -126,7 +126,6 @@ class CategoriaRead(CategoriaBase):
     id: int
     creado_en: datetime
     actualizado_en: datetime
-    multimedia: Optional[List[MultimediaRead]] = []
 
     model_config = ConfigDict(from_attributes=True)
 
