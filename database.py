@@ -52,7 +52,11 @@ RAW_URL = os.getenv("DATABASE_URL", "")
 # 👇 si quieres ver qué está leyendo en Render, deja este print un rato
 print(f"DATABASE_URL cruda: '{RAW_URL}'")
 
-ASYNC_URL = normalize_asyncpg_url(RAW_URL)
+if not RAW_URL:
+    # Fallback a SQLite para desarrollo local
+    ASYNC_URL = "sqlite+aiosqlite:///./test.db"
+else:
+    ASYNC_URL = normalize_asyncpg_url(RAW_URL)
 
 engine = create_async_engine(
     ASYNC_URL,
