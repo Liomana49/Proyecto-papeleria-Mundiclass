@@ -163,6 +163,9 @@ class Producto(Base):
 
     categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=True)
 
+    # 👇 NUEVO: URL de la imagen asociada al producto
+    imagen_url = Column(String(255), nullable=True)
+
     creado_en = Column(
         DateTime(timezone=True),
         server_default=func.now(),
