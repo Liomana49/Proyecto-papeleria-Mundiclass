@@ -140,6 +140,7 @@ class ProductoBase(BaseModel):
     valor_unitario: float
     valor_mayorista: Optional[float] = None
     categoria_id: Optional[int] = None
+    imagen_url: Optional[str] = None
 
 
 class ProductoCreate(ProductoBase):
@@ -153,13 +154,13 @@ class ProductoUpdate(BaseModel):
     valor_unitario: Optional[float] = None
     valor_mayorista: Optional[float] = None
     categoria_id: Optional[int] = None
+    imagen_url: Optional[str] = None
 
 
 class ProductoRead(ProductoBase):
     id: int
     creado_en: datetime
     actualizado_en: datetime
-    multimedia: Optional[List[MultimediaRead]] = []
 
     model_config = ConfigDict(from_attributes=True)
 
