@@ -108,7 +108,7 @@ class Cliente(Base):
     compras = relationship("Compra", back_populates="cliente")
     multimedia = relationship(
         "Multimedia",
-        primaryjoin=and_(foreign(Multimedia.model_id)==Cliente.id, Multimedia.model_type=='Cliente'),
+        primaryjoin="and_(foreign(Multimedia.model_id)==Cliente.id, Multimedia.model_type=='Cliente')",
         viewonly=True,
     )
 
