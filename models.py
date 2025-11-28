@@ -77,7 +77,7 @@ class Usuario(Base):
     clientes = relationship("Cliente", back_populates="usuario")
     multimedia = relationship(
         "Multimedia",
-        primaryjoin=and_(foreign(Multimedia.model_id)==Usuario.id, Multimedia.model_type=='Usuario'),
+        primaryjoin="and_(foreign(Multimedia.model_id)==Usuario.id, Multimedia.model_type=='Usuario')",
         viewonly=True,
     )
 
@@ -142,7 +142,7 @@ class Categoria(Base):
     productos = relationship("Producto", back_populates="categoria")
     multimedia = relationship(
         "Multimedia",
-        primaryjoin=and_(foreign(Multimedia.model_id)==Categoria.id, Multimedia.model_type=='Categoria'),
+        primaryjoin="and_(foreign(Multimedia.model_id)==Categoria.id, Multimedia.model_type=='Categoria')",
         viewonly=True,
     )
 
@@ -180,7 +180,7 @@ class Producto(Base):
     compras = relationship("Compra", back_populates="producto")
     multimedia = relationship(
         "Multimedia",
-        primaryjoin=and_(foreign(Multimedia.model_id)==Producto.id, Multimedia.model_type=='Producto'),
+        primaryjoin="and_(foreign(Multimedia.model_id)==Producto.id, Multimedia.model_type=='Producto')",
         viewonly=True,
     )
 
@@ -213,7 +213,7 @@ class Compra(Base):
     producto = relationship("Producto", back_populates="compras")
     multimedia = relationship(
         "Multimedia",
-        primaryjoin=and_(foreign(Multimedia.model_id)==Compra.id, Multimedia.model_type=='Compra'),
+        primaryjoin="and_(foreign(Multimedia.model_id)==Compra.id, Multimedia.model_type=='Compra')",
         viewonly=True,
     )
 
