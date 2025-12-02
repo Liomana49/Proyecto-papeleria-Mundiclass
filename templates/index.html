@@ -10,13 +10,69 @@
     <nav class="navbar">
         <ul>
             <li><a href="/">Inicio</a></li>
-            <li><a href="/usuarios.html">Usuarios</a></li>
-            <li><a href="/productos.html">Productos</a></li>
-            <li><a href="/clientes.html">Clientes</a></li>
-            <li><a href="/compras.html">Compras</a></li>
-            <li><a href="/categorias.html">Categorías</a></li>
-            <li><a href="/historial.html">Historial</a></li>
-            <li><a href="/planning.html">Planificación</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Usuarios</a>
+                <div class="dropdown-content">
+                    <a href="/usuarios_list.html">Listar</a>
+                    <a href="/usuarios_create.html">Crear</a>
+                    <a href="/usuarios_update.html">Actualizar</a>
+                    <a href="/usuarios_delete.html">Eliminar</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Productos</a>
+                <div class="dropdown-content">
+                    <a href="/productos_list.html">Listar</a>
+                    <a href="/productos_create.html">Crear</a>
+                    <a href="/productos_update.html">Actualizar</a>
+                    <a href="/productos_delete.html">Eliminar</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Clientes</a>
+                <div class="dropdown-content">
+                    <a href="/clientes_list.html">Listar</a>
+                    <a href="/clientes_create.html">Crear</a>
+                    <a href="/clientes_update.html">Actualizar</a>
+                    <a href="/clientes_delete.html">Eliminar</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Compras</a>
+                <div class="dropdown-content">
+                    <a href="/compras_list.html">Listar</a>
+                    <a href="/compras_create.html">Crear</a>
+                    <a href="/compras_update.html">Actualizar</a>
+                    <a href="/compras_delete.html">Eliminar</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Categorías</a>
+                <div class="dropdown-content">
+                    <a href="/categorias_list.html">Listar</a>
+                    <a href="/categorias_create.html">Crear</a>
+                    <a href="/categorias_update.html">Actualizar</a>
+                    <a href="/categorias_delete.html">Eliminar</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Historial</a>
+                <div class="dropdown-content">
+                    <a href="/historial_list.html">Listar</a>
+                    <a href="/historial_create.html">Crear</a>
+                    <a href="/historial_update.html">Actualizar</a>
+                    <a href="/historial_delete.html">Eliminar</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Planificación</a>
+                <div class="dropdown-content">
+                    <a href="/planning_list.html">Listar</a>
+                    <a href="/planning_create.html">Crear</a>
+                    <a href="/planning_update.html">Actualizar</a>
+                    <a href="/planning_delete.html">Eliminar</a>
+                </div>
+            </li>
         </ul>
     </nav>
 
@@ -69,95 +125,6 @@
 
             <h2>Estado de Salud</h2>
             <p>Verifica el estado de la API en: <a href="/health">/health</a></p>
-
-            <h2>Operaciones CRUD</h2>
-            <p>Aquí puedes realizar operaciones CRUD básicas para todos los modelos de la API.</p>
-
-            <h3>Usuarios</h3>
-            <div id="usuarios-section">
-                <h4>Lista de Usuarios</h4>
-                <div id="usuarios-list"><p>Cargando...</p></div>
-            </div>
-
-            <h3>Productos</h3>
-            <div id="productos-section">
-                <h4>Crear Producto</h4>
-                <form id="create-product-form">
-                    <label for="prod-nombre">Nombre:</label>
-                    <input type="text" id="prod-nombre" name="nombre" required>
-                    <label for="prod-descripcion">Descripción:</label>
-                    <textarea id="prod-descripcion" name="descripcion"></textarea>
-                    <label for="prod-cantidad">Cantidad:</label>
-                    <input type="number" id="prod-cantidad" name="cantidad" required>
-                    <label for="prod-valor_unitario">Valor Unitario:</label>
-                    <input type="number" step="0.01" id="prod-valor_unitario" name="valor_unitario" required>
-                    <label for="prod-valor_mayorista">Valor Mayorista:</label>
-                    <input type="number" step="0.01" id="prod-valor_mayorista" name="valor_mayorista">
-                    <label for="prod-categoria_id">Categoría ID:</label>
-                    <input type="number" id="prod-categoria_id" name="categoria_id">
-                    <button type="submit">Crear Producto</button>
-                </form>
-                <h4>Lista de Productos</h4>
-                <div id="productos-list"><p>Cargando...</p></div>
-            </div>
-
-            <h3>Clientes</h3>
-            <div id="clientes-section">
-                <h4>Crear Cliente</h4>
-                <form id="create-client-form">
-                    <label for="cli-nombre">Nombre:</label>
-                    <input type="text" id="cli-nombre" name="nombre" required>
-                    <label for="cli-cedula">Cédula:</label>
-                    <input type="text" id="cli-cedula" name="cedula" required>
-                    <label for="cli-correo">Correo:</label>
-                    <input type="email" id="cli-correo" name="correo" required>
-                    <label for="cli-telefono">Teléfono:</label>
-                    <input type="tel" id="cli-telefono" name="telefono">
-                    <label for="cli-direccion">Dirección:</label>
-                    <textarea id="cli-direccion" name="direccion"></textarea>
-                    <button type="submit">Crear Cliente</button>
-                </form>
-                <h4>Lista de Clientes</h4>
-                <div id="clientes-list"><p>Cargando...</p></div>
-            </div>
-
-            <h3>Compras</h3>
-            <div id="compras-section">
-                <h4>Crear Compra</h4>
-                <form id="create-compra-form">
-                    <label for="comp-cliente_id">Cliente ID:</label>
-                    <input type="number" id="comp-cliente_id" name="cliente_id" required>
-                    <label for="comp-producto_id">Producto ID:</label>
-                    <input type="number" id="comp-producto_id" name="producto_id" required>
-                    <label for="comp-cantidad">Cantidad:</label>
-                    <input type="number" id="comp-cantidad" name="cantidad" required>
-                    <label for="comp-precio_unitario_aplicado">Precio Unitario Aplicado:</label>
-                    <input type="number" step="0.01" id="comp-precio_unitario_aplicado" name="precio_unitario_aplicado" required>
-                    <button type="submit">Crear Compra</button>
-                </form>
-                <h4>Lista de Compras</h4>
-                <div id="compras-list"><p>Cargando...</p></div>
-            </div>
-
-            <h3>Categorías</h3>
-            <div id="categorias-section">
-                <h4>Crear Categoría</h4>
-                <form id="create-categoria-form">
-                    <label for="cat-nombre">Nombre:</label>
-                    <input type="text" id="cat-nombre" name="nombre" required>
-                    <label for="cat-descripcion">Descripción:</label>
-                    <textarea id="cat-descripcion" name="descripcion"></textarea>
-                    <button type="submit">Crear Categoría</button>
-                </form>
-                <h4>Lista de Categorías</h4>
-                <div id="categorias-list"><p>Cargando...</p></div>
-            </div>
-
-            <h3>Historial</h3>
-            <div id="historial-section">
-                <h4>Lista de Historial de Eliminaciones</h4>
-                <div id="historial-list"><p>Cargando...</p></div>
-            </div>
         </div>
     </div>
 
