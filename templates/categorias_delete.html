@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Categoría - Inventario y Ventas API</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="usuarios_list.html">Usuarios</a></li>
+            <li><a href="productos_list.html">Productos</a></li>
+            <li><a href="clientes_list.html">Clientes</a></li>
+            <li><a href="compras_list.html">Compras</a></li>
+            <li><a href="categorias_list.html">Categorías</a></li>
+            <li><a href="historial_list.html">Historial</a></li>
+            <li><a href="planning_list.html">Planificación</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="main-content">
+            <h1>Eliminar Categoría</h1>
+            <p>Esta sección permite eliminar categorías del sistema de inventario y ventas.</p>
+
+            <h2>Funcionalidades</h2>
+            <ul>
+                <li>Eliminar categorías</li>
+                <li>Ver historial de categorías eliminadas</li>
+            </ul>
+
+            <h2>Ejemplo de Uso</h2>
+            <p>Para eliminar una categoría, envía una solicitud DELETE a <code>/categorias/{id}</code>.</p>
+
+            <form id="delete-category-form">
+                <label for="id">ID de la Categoría a Eliminar:</label>
+                <input type="number" id="id" name="id" required>
+
+                <button type="submit">Eliminar Categoría</button>
+            </form>
+
+            <h2>Acciones</h2>
+            <ul>
+                <li><a href="categorias_list.html">Listar Categorías</a></li>
+                <li><a href="categorias_create.html">Crear Nueva Categoría</a></li>
+                <li><a href="categorias_update.html">Actualizar Categoría</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Inventario y Ventas API. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // Aquí iría el JavaScript para interactuar con la API
+        // Por simplicidad, se omite en este ejemplo
+    </script>
+</body>
+</html>
