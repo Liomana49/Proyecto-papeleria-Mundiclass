@@ -59,6 +59,34 @@ async def root(request: Request):
 async def health():
     return {"ok": True}
 
+# Rutas para páginas HTML
+@app.get("/usuarios.html", tags=["Pages"])
+async def usuarios_page(request: Request):
+    return templates.TemplateResponse("usuarios.html", {"request": request})
+
+@app.get("/productos.html", tags=["Pages"])
+async def productos_page(request: Request):
+    return templates.TemplateResponse("productos.html", {"request": request})
+
+@app.get("/clientes.html", tags=["Pages"])
+async def clientes_page(request: Request):
+    return templates.TemplateResponse("clientes.html", {"request": request})
+
+@app.get("/compras.html", tags=["Pages"])
+async def compras_page(request: Request):
+    return templates.TemplateResponse("compras.html", {"request": request})
+
+@app.get("/categorias.html", tags=["Pages"])
+async def categorias_page(request: Request):
+    return templates.TemplateResponse("categorias.html", {"request": request})
+
+@app.get("/historial.html", tags=["Pages"])
+async def historial_page(request: Request):
+    return templates.TemplateResponse("historial.html", {"request": request})
+
+@app.get("/planning.html", tags=["Pages"])
+async def planning_page(request: Request):
+    return templates.TemplateResponse("planning.html", {"request": request})
 
 app.include_router(usuarios_router)
 app.include_router(productos_router)

@@ -9,14 +9,14 @@
 <body>
     <nav class="navbar">
         <ul>
-            <li><a href="index.html">Inicio</a></li>
-            <li><a href="usuarios.html">Usuarios</a></li>
-            <li><a href="productos.html">Productos</a></li>
-            <li><a href="clientes.html">Clientes</a></li>
-            <li><a href="compras.html">Compras</a></li>
-            <li><a href="categorias.html">Categorías</a></li>
-            <li><a href="historial.html">Historial</a></li>
-            <li><a href="planning.html">Planificación</a></li>
+            <li><a href="/">Inicio</a></li>
+            <li><a href="/usuarios.html">Usuarios</a></li>
+            <li><a href="/productos.html">Productos</a></li>
+            <li><a href="/clientes.html">Clientes</a></li>
+            <li><a href="/compras.html">Compras</a></li>
+            <li><a href="/categorias.html">Categorías</a></li>
+            <li><a href="/historial.html">Historial</a></li>
+            <li><a href="/planning.html">Planificación</a></li>
         </ul>
     </nav>
 
@@ -81,8 +81,57 @@
     </footer>
 
     <script>
-        // Aquí iría el JavaScript para interactuar con la API
-        // Por simplicidad, se omite en este ejemplo
+        // Función para cargar usuarios
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch('/usuarios');
+                const usuarios = await response.json();
+                const lista = document.getElementById('usuarios-list');
+                lista.innerHTML = '<h3>Lista de Usuarios</h3><ul>';
+                usuarios.forEach(usuario => {
+                    lista.innerHTML += `<li>ID: ${usuario.id}, Nombre: ${usuario.nombre}, Cédula: ${usuario.cedula}, Correo: ${usuario.correo}, Rol: ${usuario.rol}</li>`;
+                });
+                lista.innerHTML += '</ul>';
+            } catch (error) {
+                console.error('Error al cargar usuarios:', error);
+                document.getElementById('usuarios-list').innerHTML = '<p>Error al cargar usuarios.</p>';
+            }
+        }
+
+        // Función para crear usuario
+        document.getElementById('create-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const usuario = {
+                nombre: formData.get('nombre'),
+                cedula: formData.get('cedula'),
+                correo: formData.get('correo'),
+                rol: formData.get('rol')
+            };
+
+            try {
+                const response = await fetch('/usuarios', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(usuario)
+                });
+                if (response.ok) {
+                    alert('Usuario creado exitosamente');
+                    e.target.reset();
+                    cargarUsuarios();
+                } else {
+                    alert('Error al crear usuario');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al crear usuario');
+            }
+        });
+
+        // Cargar usuarios al cargar la página
+        window.onload = cargarUsuarios;
     </script>
 </body>
 </html>
