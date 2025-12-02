@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Planificación - Inventario y Ventas API</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="models_list.html">Modelos</a></li>
+            <li><a href="modify.html">Modificar</a></li>
+            <li><a href="delete.html">Eliminar</a></li>
+            <li><a href="planning_list.html">Planificación</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="main-content">
+            <h1>Eliminar Planificación</h1>
+            <p>Esta sección permite eliminar entradas de planificación del proyecto de inventario y ventas.</p>
+
+            <h2>Funcionalidades</h2>
+            <ul>
+                <li>Eliminar entradas de planificación</li>
+            </ul>
+
+            <h2>Ejemplo de Uso</h2>
+            <p>Para eliminar una entrada de planificación, envía una solicitud DELETE a <code>/planning/{id}</code>.</p>
+
+            <form id="delete-planning-form">
+                <label for="id">ID de la Planificación a Eliminar:</label>
+                <input type="number" id="id" name="id" required>
+
+                <button type="submit">Eliminar Planificación</button>
+            </form>
+
+            <h2>Acciones</h2>
+            <ul>
+                <li><a href="planning_list.html">Listar Planificación</a></li>
+                <li><a href="planning_create.html">Crear Nueva Planificación</a></li>
+                <li><a href="planning_update.html">Actualizar Planificación</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Inventario y Ventas API. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // Aquí iría el JavaScript para interactuar con la API
+        // Por simplicidad, se omite en este ejemplo
+    </script>
+</body>
+</html>

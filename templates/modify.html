@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificar Modelos - Inventario y Ventas API</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <style>
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ccc;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: none;
+            outline: none;
+        }
+        .tab.active {
+            background-color: #ddd;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="models_list.html">Modelos</a></li>
+            <li><a href="modify.html">Modificar</a></li>
+            <li><a href="delete.html">Eliminar</a></li>
+            <li><a href="planning_list.html">Planificación</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="main-content">
+            <h1>Modificar Modelos</h1>
+            <p>Esta sección permite modificar modelos existentes en el sistema de inventario y ventas.</p>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('categorias')">Categorías</button>
+                <button class="tab" onclick="showTab('productos')">Productos</button>
+                <button class="tab" onclick="showTab('clientes')">Clientes</button>
+                <button class="tab" onclick="showTab('compras')">Compras</button>
+                <button class="tab" onclick="showTab('usuarios')">Usuarios</button>
+                <button class="tab" onclick="showTab('historial')">Historial</button>
+            </div>
+
+            <div id="categorias" class="tab-content active">
+                <h2>Actualizar Categoría</h2>
+                <form id="update-category-form">
+                    <label for="id">ID de la Categoría:</label>
+                    <input type="number" id="id" name="id" required>
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                    <label for="codigo">Código:</label>
+                    <input type="text" id="codigo" name="codigo">
+                    <label for="imagen">Imagen:</label>
+                    <input type="file" id="imagen" name="imagen" accept="image/*">
+                    <button type="submit">Actualizar Categoría</button>
+                </form>
+            </div>
+
+            <div id="productos" class="tab-content">
+                <h2>Actualizar Producto</h2>
+                <form id="update-product-form">
+                    <label for="id">ID del Producto:</label>
+                    <input type="number" id="id" name="id" required>
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion" name="descripcion"></textarea>
+                    <label for="cantidad">Cantidad:</label>
+                    <input type="number" id="cantidad" name="cantidad" required>
+                    <label for="valor_unitario">Valor Unitario:</label>
+                    <input type="number" step="0.01" id="valor_unitario" name="valor_unitario" required>
+                    <label for="valor_mayorista">Valor Mayorista:</label>
+                    <input type="number" step="0.01" id="valor_mayorista" name="valor_mayorista">
+                    <label for="categoria_id">Categoría ID:</label>
+                    <input type="number" id="categoria_id" name="categoria_id">
+                    <label for="imagen">Imagen:</label>
+                    <input type="file" id="imagen" name="imagen" accept="image/*">
+                    <button type="submit">Actualizar Producto</button>
+                </form>
+            </div>
+
+            <div id="clientes" class="tab-content">
+                <h2>Actualizar Cliente</h2>
+                <form id="update-client-form">
+                    <label for="id">ID del Cliente:</label>
+                    <input type="number" id="id" name="id" required>
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                    <label for="cedula">Cédula:</label>
+                    <input type="text" id="cedula" name="cedula" required>
+                    <label for="correo">Correo:</label>
+                    <input type="email" id="correo" name="correo" required>
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" name="telefono">
+                    <label for="direccion">Dirección:</label>
+                    <textarea id="direccion" name="direccion"></textarea>
+                    <button type="submit">Actualizar Cliente</button>
+                </form>
+            </div>
+
+            <div id="compras" class="tab-content">
+                <h2>Actualizar Compra</h2>
+                <form id="update-compra-form">
+                    <label for="id">ID de la Compra:</label>
+                    <input type="number" id="id" name="id" required>
+                    <label for="cliente_id">Cliente ID:</label>
+                    <input type="number" id="cliente_id" name="cliente_id" required>
+                    <label for="producto_id">Producto ID:</label>
+                    <input type="number" id="producto_id" name="producto_id" required>
+                    <label for="cantidad">Cantidad:</label>
+                    <input type="number" id="cantidad" name="cantidad" required>
+                    <label for="precio_unitario_aplicado">Precio Unitario Aplicado:</label>
+                    <input type="number" step="0.01" id="precio_unitario_aplicado" name="precio_unitario_aplicado" required>
+                    <button type="submit">Actualizar Compra</button>
+                </form>
+            </div>
+
+            <div id="usuarios" class="tab-content">
+                <h2>Actualizar Usuario</h2>
+                <form id="update-user-form">
+                    <label for="id">ID del Usuario:</label>
+                    <input type="number" id="id" name="id" required>
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                    <label for="cedula">Cédula:</label>
+                    <input type="text" id="cedula" name="cedula" required>
+                    <label for="correo">Correo:</label>
+                    <input type="email" id="correo" name="correo" required>
+                    <label for="rol">Rol:</label>
+                    <select id="rol" name="rol" required>
+                        <option value="admin">Administrador</option>
+                        <option value="vendedor">Vendedor</option>
+                        <option value="cliente">Cliente</option>
+                    </select>
+                    <button type="submit">Actualizar Usuario</button>
+                </form>
+            </div>
+
+            <div id="historial" class="tab-content">
+                <h2>Actualizar Historial</h2>
+                <form id="update-historial-form">
+                    <label for="id">ID del Historial:</label>
+                    <input type="number" id="id" name="id" required>
+                    <label for="entidad">Entidad:</label>
+                    <input type="text" id="entidad" name="entidad" required>
+                    <label for="entidad_id">Entidad ID:</label>
+                    <input type="number" id="entidad_id" name="entidad_id" required>
+                    <label for="accion">Acción:</label>
+                    <select id="accion" name="accion" required>
+                        <option value="create">Crear</option>
+                        <option value="update">Actualizar</option>
+                        <option value="delete">Eliminar</option>
+                    </select>
+                    <label for="old_values">Valores Antiguos:</label>
+                    <textarea id="old_values" name="old_values"></textarea>
+                    <label for="new_values">Valores Nuevos:</label>
+                    <textarea id="new_values" name="new_values"></textarea>
+                    <label for="user_id">Usuario ID:</label>
+                    <input type="number" id="user_id" name="user_id" required>
+                    <button type="submit">Actualizar Historial</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Inventario y Ventas API. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
