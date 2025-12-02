@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Inventario y Ventas API</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="usuarios.html">Usuarios</a></li>
+            <li><a href="productos.html">Productos</a></li>
+            <li><a href="clientes.html">Clientes</a></li>
+            <li><a href="compras.html">Compras</a></li>
+            <li><a href="categorias.html">Categorías</a></li>
+            <li><a href="historial.html">Historial</a></li>
+            <li><a href="planning.html">Planificación</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="main-content">
+            <h1>Bienvenido a la API de Inventario y Ventas</h1>
+
+            <h2>Presentación del Proyecto</h2>
+            <p>Esta API asíncrona está diseñada para gestionar de manera eficiente un sistema de inventario y ventas. Utiliza FastAPI para proporcionar una interfaz robusta y escalable, con soporte para operaciones CRUD completas en usuarios, productos, clientes, compras, categorías y un historial de eliminaciones.</p>
+
+            <h2>Objetivos del Proyecto</h2>
+            <ul>
+                <li>Proporcionar una API RESTful completa para la gestión de inventarios y ventas</li>
+                <li>Implementar operaciones asíncronas para un rendimiento óptimo</li>
+                <li>Incluir funcionalidades avanzadas como subida de imágenes con Supabase</li>
+                <li>Mantener un historial auditado de todas las eliminaciones</li>
+                <li>Ofrecer documentación automática con Swagger UI y ReDoc</li>
+                <li>Garantizar la integridad de datos con validaciones Pydantic</li>
+                <li>Soportar CORS para integración con frontends</li>
+            </ul>
+
+            <h2>Características Principales</h2>
+            <ul>
+                <li><strong>Gestión de Usuarios:</strong> Crear, leer, actualizar y eliminar usuarios con roles definidos</li>
+                <li><strong>Catálogo de Productos:</strong> Manejar inventario con imágenes, precios unitarios y mayoristas</li>
+                <li><strong>Base de Clientes:</strong> Mantener información detallada de clientes</li>
+                <li><strong>Registro de Compras:</strong> Trackear ventas con cálculos automáticos de totales</li>
+                <li><strong>Organización por Categorías:</strong> Clasificar productos con soporte para imágenes</li>
+                <li><strong>Historial de Eliminaciones:</strong> Auditoría completa de datos eliminados</li>
+                <li><strong>Subida de Imágenes:</strong> Integración con Supabase para almacenamiento en la nube</li>
+            </ul>
+
+            <h2>Tecnologías Utilizadas</h2>
+            <ul>
+                <li><strong>FastAPI:</strong> Framework web asíncrono para Python</li>
+                <li><strong>SQLAlchemy:</strong> ORM para interacciones con base de datos</li>
+                <li><strong>PostgreSQL:</strong> Base de datos relacional</li>
+                <li><strong>Pydantic:</strong> Validación de datos</li>
+                <li><strong>Supabase:</strong> Almacenamiento de imágenes en la nube</li>
+                <li><strong>Uvicorn:</strong> Servidor ASGI</li>
+            </ul>
+
+            <h2>Documentación de la API</h2>
+            <p>Accede a la documentación interactiva en:</p>
+            <ul>
+                <li><a href="/docs" target="_blank">Swagger UI</a></li>
+                <li><a href="/redoc" target="_blank">ReDoc</a></li>
+                <li><a href="/openapi.json" target="_blank">OpenAPI JSON</a></li>
+            </ul>
+
+            <h2>Estado de Salud</h2>
+            <p>Verifica el estado de la API en: <a href="/health">/health</a></p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Inventario y Ventas API. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

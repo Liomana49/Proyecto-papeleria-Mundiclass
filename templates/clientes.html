@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - Inventario y Ventas API</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="usuarios.html">Usuarios</a></li>
+            <li><a href="productos.html">Productos</a></li>
+            <li><a href="clientes.html">Clientes</a></li>
+            <li><a href="compras.html">Compras</a></li>
+            <li><a href="categorias.html">Categorías</a></li>
+            <li><a href="historial.html">Historial</a></li>
+            <li><a href="planning.html">Planificación</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="main-content">
+            <h1>Gestión de Clientes</h1>
+            <p>Esta sección permite gestionar los clientes del sistema de inventario y ventas.</p>
+
+            <h2>Funcionalidades</h2>
+            <ul>
+                <li>Listar todos los clientes</li>
+                <li>Ver detalles de un cliente específico</li>
+                <li>Crear nuevos clientes</li>
+                <li>Actualizar información de clientes existentes</li>
+                <li>Eliminar clientes</li>
+                <li>Ver historial de clientes eliminados</li>
+            </ul>
+
+            <h2>Campos de Cliente</h2>
+            <ul>
+                <li><strong>ID:</strong> Identificador único del cliente</li>
+                <li><strong>Nombre:</strong> Nombre completo del cliente</li>
+                <li><strong>Cédula:</strong> Número de identificación</li>
+                <li><strong>Correo:</strong> Dirección de email</li>
+                <li><strong>Teléfono:</strong> Número de teléfono</li>
+                <li><strong>Dirección:</strong> Dirección física</li>
+                <li><strong>Fecha de Creación:</strong> Fecha en que se creó el cliente</li>
+            </ul>
+
+            <h2>Ejemplo de Uso</h2>
+            <p>Para crear un nuevo cliente, envía una solicitud POST a <code>/clientes</code> con los datos requeridos.</p>
+
+            <div id="clientes-list">
+                <!-- Aquí se mostrarían los clientes dinámicamente -->
+                <p>Cargando clientes...</p>
+            </div>
+
+            <h2>Crear Nuevo Cliente</h2>
+            <form id="create-client-form">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" required>
+
+                <label for="cedula">Cédula:</label>
+                <input type="text" id="cedula" name="cedula" required>
+
+                <label for="correo">Correo:</label>
+                <input type="email" id="correo" name="correo" required>
+
+                <label for="telefono">Teléfono:</label>
+                <input type="tel" id="telefono" name="telefono">
+
+                <label for="direccion">Dirección:</label>
+                <textarea id="direccion" name="direccion"></textarea>
+
+                <button type="submit">Crear Cliente</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Inventario y Ventas API. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // Aquí iría el JavaScript para interactuar con la API
+        // Por simplicidad, se omite en este ejemplo
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial - Inventario y Ventas API</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="usuarios.html">Usuarios</a></li>
+            <li><a href="productos.html">Productos</a></li>
+            <li><a href="clientes.html">Clientes</a></li>
+            <li><a href="compras.html">Compras</a></li>
+            <li><a href="categorias.html">Categorías</a></li>
+            <li><a href="historial.html">Historial</a></li>
+            <li><a href="planning.html">Planificación</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="main-content">
+            <h1>Historial de Eliminaciones</h1>
+            <p>Esta sección muestra el historial de todos los elementos eliminados en el sistema de inventario y ventas.</p>
+
+            <h2>Funcionalidades</h2>
+            <ul>
+                <li>Listar todos los elementos eliminados</li>
+                <li>Ver detalles de cada eliminación</li>
+                <li>Filtrar por tipo de elemento</li>
+            </ul>
+
+            <h2>Campos del Historial</h2>
+            <ul>
+                <li><strong>ID:</strong> Identificador único del registro de eliminación</li>
+                <li><strong>Tabla:</strong> Tabla de la que se eliminó el elemento</li>
+                <li><strong>ID del Elemento:</strong> ID del elemento eliminado</li>
+                <li><strong>Datos:</strong> Información del elemento eliminado</li>
+                <li><strong>Fecha de Eliminación:</strong> Fecha y hora en que se realizó la eliminación</li>
+            </ul>
+
+            <h2>Ejemplo de Uso</h2>
+            <p>Para ver el historial completo, envía una solicitud GET a <code>/historial/eliminados</code>.</p>
+
+            <div id="historial-list">
+                <!-- Aquí se mostraría el historial dinámicamente -->
+                <p>Cargando historial...</p>
+            </div>
+
+            <h2>Filtros</h2>
+            <form id="filter-form">
+                <label for="tabla">Tabla:</label>
+                <select id="tabla" name="tabla">
+                    <option value="">Todas</option>
+                    <option value="usuarios">Usuarios</option>
+                    <option value="productos">Productos</option>
+                    <option value="clientes">Clientes</option>
+                    <option value="compras">Compras</option>
+                    <option value="categorias">Categorías</option>
+                </select>
+
+                <button type="submit">Filtrar</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Inventario y Ventas API. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // Aquí iría el JavaScript para interactuar con la API
+        // Por simplicidad, se omite en este ejemplo
+    </script>
+</body>
+</html>
