@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from contextlib import asynccontextmanager
 
 # ✅ Importa routers (asegúrate de que existan en /routers)
@@ -11,6 +13,8 @@ from routers.router_categoria import router as categorias_router
 from routers.router_historial import router as historial_router
 
 from database import engine, Base
+
+templates = Jinja2Templates(directory="templates")
 
 
 @asynccontextmanager
@@ -44,10 +48,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Montar archivos estáticos
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.get("/", tags=["Health"])
-async def root():
-    return {"status": "ok", "service": "inventario-ventas-api"}
+@app.get("/", tags=["Home"])
+async def root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/health", tags=["Health"])
 async def health():
