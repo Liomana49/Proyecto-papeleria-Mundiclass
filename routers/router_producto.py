@@ -106,3 +106,35 @@ async def eliminar_producto(producto_id: int, db: AsyncSession = Depends(get_db)
 async def historial_productos_eliminados(db: AsyncSession = Depends(get_db)):
     return await crud.listar_historial(db)
 
+
+# ==========================
+#   SUBIR IMAGEN PRODUCTO
+# ==========================
+@router.post("/{producto_id}/imagen")
+async def subir_imagen_producto(
+    producto_id: int,
+    archivo: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+):
+    producto = await crud.obtener_producto(db, producto_id)
+    if not producto:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+
+    if not archivo.content_type or not archivo.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail="El archivo debe ser una imagen (jpg, png, etc.)",
+        )
+
+    # 👇 usamos folder="productos"; bucket ya es 'Mundiclass'
+    url_publica = await upload_image_to_supabase(archivo, folder="productos")
+
+    # Guardar la imagen en la BD también desde este endpoint
+    payload = schemas.ProductoUpdate(imagen_url=url_publica)
+    await crud.actualizar_producto(db, producto_id, payload)
+
+    return {
+        "producto_id": producto_id,
+        "url_publica": url_publica,
+    }
+
