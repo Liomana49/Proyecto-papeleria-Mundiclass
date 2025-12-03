@@ -108,6 +108,10 @@ async def clientes_read_page(request: Request):
 async def clientes_update_page(request: Request):
     return templates.TemplateResponse("clientes/update.html", {"request": request})
 
+@app.get("/clientes/delete.html", tags=["Pages"])
+async def clientes_delete_page(request: Request):
+    return templates.TemplateResponse("clientes/delete.html", {"request": request})
+
 @app.get("/productos/read.html", tags=["Pages"])
 async def productos_read_page(request: Request):
     return templates.TemplateResponse("productos/read.html", {"request": request})
