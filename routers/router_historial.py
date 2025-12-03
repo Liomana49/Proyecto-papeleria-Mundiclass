@@ -8,7 +8,7 @@ from database import get_db
 from models import HistorialEliminados
 import schemas
 
-router = APIRouter(prefix="/historial", tags=["Historial"])
+router = APIRouter(prefix="/api/historial", tags=["Historial"])
 
 @router.get("/eliminados", response_model=List[schemas.HistorialEliminadoRead])
 async def listar_eliminados(db: AsyncSession = Depends(get_db)):

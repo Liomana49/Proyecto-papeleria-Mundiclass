@@ -8,7 +8,7 @@ from database import get_db
 import schemas
 import crud
 
-router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
+router = APIRouter(prefix="/api/usuarios", tags=["Usuarios"])
 
 @router.get("/", response_model=List[schemas.UsuarioRead])
 async def listar_usuarios(

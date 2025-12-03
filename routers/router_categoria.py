@@ -17,7 +17,7 @@ import schemas
 import crud
 from utils import upload_image_to_supabase
 
-router = APIRouter(prefix="/categorias", tags=["Categorias"])
+router = APIRouter(prefix="/api/categorias", tags=["Categorias"])
 
 
 @router.get("/", response_model=List[schemas.CategoriaRead])

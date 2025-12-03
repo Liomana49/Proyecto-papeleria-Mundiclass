@@ -9,7 +9,7 @@ import schemas
 import crud
 from utils import upload_image_to_supabase
 
-router = APIRouter(prefix="/productos", tags=["Productos"])
+router = APIRouter(prefix="/api/productos", tags=["Productos"])
 
 @router.get("/", response_model=List[schemas.ProductoRead])
 async def listar_productos(

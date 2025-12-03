@@ -8,7 +8,7 @@ from database import get_db
 import schemas
 import crud
 
-router = APIRouter(prefix="/clientes", tags=["Clientes"])
+router = APIRouter(prefix="/api/clientes", tags=["Clientes"])
 
 @router.get("/", response_model=List[schemas.ClienteRead])
 async def listar_clientes(
