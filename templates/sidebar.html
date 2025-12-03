@@ -1,0 +1,82 @@
+<!-- Sidebar Navigation -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2>Menu</h2>
+        <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <ul class="sidebar-menu">
+        <li>
+            <a href="/" class="menu-item">
+                <i class="icon-home"></i> Inicio
+            </a>
+        </li>
+        <li class="has-submenu">
+            <a href="#" class="menu-item submenu-toggle" onclick="toggleSubmenu(this)">
+                <i class="icon-category"></i> Categorías
+                <i class="arrow"></i>
+            </a>
+            <ul class="submenu">
+                <li><a href="/categorias">Ver Categorías</a></li>
+                <li><a href="/categorias/create">Crear Categoría</a></li>
+                <li><a href="/categorias/update">Actualizar Categoría</a></li>
+            </ul>
+        </li>
+        <li class="has-submenu">
+            <a href="#" class="menu-item submenu-toggle" onclick="toggleSubmenu(this)">
+                <i class="icon-product"></i> Productos
+                <i class="arrow"></i>
+            </a>
+            <ul class="submenu">
+                <li><a href="/productos">Ver Productos</a></li>
+                <li><a href="/productos/update">Actualizar Producto</a></li>
+            </ul>
+        </li>
+        <li class="has-submenu">
+            <a href="#" class="menu-item submenu-toggle" onclick="toggleSubmenu(this)">
+                <i class="icon-client"></i> Clientes
+                <i class="arrow"></i>
+            </a>
+            <ul class="submenu">
+                <li><a href="/clientes">Ver Clientes</a></li>
+                <li><a href="/clientes/create">Crear Cliente</a></li>
+                <li><a href="/clientes/update">Actualizar Cliente</a></li>
+            </ul>
+        </li>
+        <li class="has-submenu">
+            <a href="#" class="menu-item submenu-toggle" onclick="toggleSubmenu(this)">
+                <i class="icon-sale"></i> Ventas
+                <i class="arrow"></i>
+            </a>
+            <ul class="submenu">
+                <li><a href="/ventas">Ver Ventas</a></li>
+                <li><a href="/ventas/update">Actualizar Venta</a></li>
+                <li><a href="/ventas/delete">Eliminar Venta</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="/historial" class="menu-item">
+                <i class="icon-history"></i> Historial
+            </a>
+        </li>
+        <li>
+            <a href="/planning" class="menu-item">
+                <i class="icon-planning"></i> Planificación
+            </a>
+        </li>
+        <li>
+            <a href="/informacion-del-proyecto" class="menu-item">
+                <i class="icon-info"></i> Información del Proyecto
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay for mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- Hamburger button -->
+<button class="hamburger-btn" onclick="toggleSidebar()">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>

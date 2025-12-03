@@ -2,9 +2,14 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 80px 0 0 0; /* Added top padding for fixed navbar */
+    padding: 0;
     background-color: #f4f4f4;
     color: #333;
+    transition: margin-left 0.3s ease;
+}
+
+body.sidebar-open {
+    margin-left: 250px;
 }
 
 .container {
@@ -13,77 +18,213 @@ body {
     padding: 20px;
 }
 
-/* Navigation Bar */
-.navbar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    overflow: hidden;
+/* Sidebar Styles */
+.sidebar {
     position: fixed;
+    left: -250px;
     top: 0;
-    left: 0;
-    right: 0;
-    z-index: 10000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: center;
-    /* Se añade padding vertical a la navbar, no a los elementos internos */
-    padding: 5px 0; 
-    height: auto;
-}
-
-.navbar a, .dropbtn {
-    display: inline-block;
+    width: 250px;
+    height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    text-align: center;
-    padding: 14px 20px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    border-radius: 5px;
-    /* CORRECCIÓN 1: Eliminamos el margin vertical, solo dejamos espaciado horizontal */
-    margin: 0 5px;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
 }
 
-.navbar a:hover, .dropbtn:hover {
-    background-color: rgba(255,255,255,0.2);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+.sidebar.open {
+    left: 0;
 }
 
-.dropdown {
-    position: relative;
-    display: inline-block;
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.dropdown-content {
-    display: none;
-    position: absolute;
-    /* CORRECCIÓN 2: top: 100% y forzamos una superposición con margin-top negativo */
-    top: 100%;
-    margin-top: -3px; /* Fuerza el contenido a superponerse 3px con el borde inferior del botón */
-    
-    background-color: #f9f9f9;
-    min-width: 200px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-    z-index: 10001;
-    border-radius: 5px;
-    overflow: hidden;
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 1.2em;
 }
 
-.dropdown-content a {
-    color: #333;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
     transition: background-color 0.3s ease;
 }
 
-.dropdown-content a:hover {
-    background-color: #e6e6e6;
+.close-btn:hover {
+    background-color: rgba(255,255,255,0.2);
 }
 
-.dropdown:hover .dropdown-content {
-    /* Esta regla ahora es más robusta porque el cursor permanece en la zona de hover */
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    text-decoration: none;
+    color: white;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.icon {
+    margin-right: 10px;
+    font-size: 1.2em;
+    width: 20px;
+    text-align: center;
+}
+
+.submenu-toggle.active .arrow {
+    transform: rotate(90deg);
+}
+
+.arrow {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+}
+
+.submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background-color: rgba(255,255,255,0.1);
+}
+
+.submenu li {
+    border-bottom: none;
+}
+
+.submenu a {
+    padding: 10px 20px 10px 50px;
     display: block;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.submenu a:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* Hamburger Button */
+.hamburger-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 40px;
+    height: 40px;
+    transition: all 0.3s ease;
+}
+
+.hamburger-btn:hover {
+    transform: scale(1.1);
+}
+
+.hamburger-btn span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: white;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hamburger-btn {
+        display: flex;
+    }
+    
+    .sidebar {
+        left: -250px;
+    }
+    
+    .sidebar.open {
+        left: 0;
+    }
+    
+    body.sidebar-open {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 769px) {
+    .hamburger-btn {
+        display: none;
+    }
+    
+    .sidebar {
+        left: 0;
+    }
+    
+    body {
+        margin-left: 250px;
+    }
+    
+    .sidebar-overlay {
+        display: none;
+    }
 }
 
 /* Main Content */
