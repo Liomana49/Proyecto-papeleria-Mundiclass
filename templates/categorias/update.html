@@ -56,7 +56,7 @@
     <script>
         async function loadCategorias() {
             try {
-                const response = await fetch('/categorias');
+                const response = await fetch('/api/categorias');
                 const categorias = await response.json();
                 const listDiv = document.getElementById('categorias-list');
 
@@ -93,7 +93,7 @@
             if (imagenInput.files[0]) formData.append('imagen', imagenInput.files[0]);
 
             try {
-                const response = await fetch(`/categorias/${id}`, {
+                const response = await fetch(`/api/categorias/${id}`, {
                     method: 'PUT',
                     body: formData
                 });
