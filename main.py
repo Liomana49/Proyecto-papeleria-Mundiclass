@@ -80,6 +80,50 @@ async def compras_page(request: Request):
 async def categorias_page(request: Request):
     return templates.TemplateResponse("categorias.html", {"request": request})
 
+@app.get("/categorias/create.html", tags=["Pages"])
+async def categorias_create_page(request: Request):
+    return templates.TemplateResponse("categorias/create.html", {"request": request})
+
+@app.get("/categorias/read.html", tags=["Pages"])
+async def categorias_read_page(request: Request):
+    return templates.TemplateResponse("categorias/read.html", {"request": request})
+
+@app.get("/categorias/update.html", tags=["Pages"])
+async def categorias_update_page(request: Request):
+    return templates.TemplateResponse("categorias/update.html", {"request": request})
+
+@app.get("/clientes/create.html", tags=["Pages"])
+async def clientes_create_page(request: Request):
+    return templates.TemplateResponse("clientes/create.html", {"request": request})
+
+@app.get("/clientes/read.html", tags=["Pages"])
+async def clientes_read_page(request: Request):
+    return templates.TemplateResponse("clientes/read.html", {"request": request})
+
+@app.get("/clientes/update.html", tags=["Pages"])
+async def clientes_update_page(request: Request):
+    return templates.TemplateResponse("clientes/update.html", {"request": request})
+
+@app.get("/productos/read.html", tags=["Pages"])
+async def productos_read_page(request: Request):
+    return templates.TemplateResponse("productos/read.html", {"request": request})
+
+@app.get("/productos/update.html", tags=["Pages"])
+async def productos_update_page(request: Request):
+    return templates.TemplateResponse("productos/update.html", {"request": request})
+
+@app.get("/ventas/read.html", tags=["Pages"])
+async def ventas_read_page(request: Request):
+    return templates.TemplateResponse("ventas/read.html", {"request": request})
+
+@app.get("/ventas/update.html", tags=["Pages"])
+async def ventas_update_page(request: Request):
+    return templates.TemplateResponse("ventas/update.html", {"request": request})
+
+@app.get("/ventas/delete.html", tags=["Pages"])
+async def ventas_delete_page(request: Request):
+    return templates.TemplateResponse("ventas/delete.html", {"request": request})
+
 @app.get("/historial.html", tags=["Pages"])
 async def historial_page(request: Request):
     return templates.TemplateResponse("historial.html", {"request": request})
