@@ -73,7 +73,7 @@
             const messageDiv = document.getElementById('message');
 
             try {
-                const response = await fetch(`/productos/${productoId}`, {
+                const response = await fetch(`/api/productos/${productoId}`, {
                     method: 'DELETE'
                 });
 
