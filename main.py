@@ -92,6 +92,10 @@ async def categorias_read_page(request: Request):
 async def categorias_update_page(request: Request):
     return templates.TemplateResponse("categorias/update.html", {"request": request})
 
+@app.get("/categorias/delete.html", tags=["Pages"])
+async def categorias_delete_page(request: Request):
+    return templates.TemplateResponse("categorias/delete.html", {"request": request})
+
 @app.get("/clientes/create.html", tags=["Pages"])
 async def clientes_create_page(request: Request):
     return templates.TemplateResponse("clientes/create.html", {"request": request})
@@ -112,9 +116,21 @@ async def productos_read_page(request: Request):
 async def productos_update_page(request: Request):
     return templates.TemplateResponse("productos/update.html", {"request": request})
 
+@app.get("/productos/create.html", tags=["Pages"])
+async def productos_create_page(request: Request):
+    return templates.TemplateResponse("productos/create.html", {"request": request})
+
+@app.get("/productos/delete.html", tags=["Pages"])
+async def productos_delete_page(request: Request):
+    return templates.TemplateResponse("productos/delete.html", {"request": request})
+
 @app.get("/ventas/read.html", tags=["Pages"])
 async def ventas_read_page(request: Request):
     return templates.TemplateResponse("ventas/read.html", {"request": request})
+
+@app.get("/ventas/create.html", tags=["Pages"])
+async def ventas_create_page(request: Request):
+    return templates.TemplateResponse("ventas/create.html", {"request": request})
 
 @app.get("/ventas/update.html", tags=["Pages"])
 async def ventas_update_page(request: Request):
@@ -123,6 +139,10 @@ async def ventas_update_page(request: Request):
 @app.get("/ventas/delete.html", tags=["Pages"])
 async def ventas_delete_page(request: Request):
     return templates.TemplateResponse("ventas/delete.html", {"request": request})
+
+@app.get("/informacion_del_proyecto.html", tags=["Pages"])
+async def informacion_del_proyecto_page(request: Request):
+    return templates.TemplateResponse("informacion_del_proyecto.html", {"request": request})
 
 @app.get("/historial.html", tags=["Pages"])
 async def historial_page(request: Request):
