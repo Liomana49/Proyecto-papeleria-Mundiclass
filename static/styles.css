@@ -55,14 +55,17 @@ body {
 .dropdown-content {
     display: none;
     position: absolute;
-    /* AJUSTE CLAVE para prevenir que el menú desaparezca al mover el ratón */
-    top: 54px; 
+    /* ----------------------------------------------- */
+    /* AJUSTE CLAVE PARA ELIMINAR EL ESPACIO (GAP) */
+    top: 100%;       /* Inicia exactamente debajo del borde inferior del dropbtn */
+    margin-top: -5px;/* Crea un solapamiento de 5px para asegurar la continuidad del :hover */
+    /* ----------------------------------------------- */
+    background-color: #f9f9f9;
     min-width: 200px;
     box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     z-index: 10001;
     border-radius: 5px;
     overflow: hidden;
-    background-color: #f9f9f9;
 }
 
 .dropdown-content a {
