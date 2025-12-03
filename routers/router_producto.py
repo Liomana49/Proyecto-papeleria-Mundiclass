@@ -21,12 +21,7 @@ async def listar_productos(
 
 @router.post("/", response_model=schemas.ProductoRead, status_code=status.HTTP_201_CREATED)
 async def crear_producto(
-    nombre: str = Query(...),
-    descripcion: Optional[str] = Query(None),
-    cantidad: int = Query(...),
-    valor_unitario: float = Query(...),
-    valor_mayorista: Optional[float] = Query(None),
-    categoria_id: Optional[int] = Query(None),
+    payload: schemas.ProductoCreate,
     imagen: Optional[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
 ):
@@ -41,33 +36,16 @@ async def crear_producto(
         # 👇 usamos folder="productos"
         imagen_url = await upload_image_to_supabase(imagen, folder="productos")
 
-    # Construimos el dict de datos para el schema
-    data_dict = {
-        "nombre": nombre,
-        "cantidad": cantidad,
-        "valor_unitario": valor_unitario,
-    }
-    if descripcion:
-        data_dict["descripcion"] = descripcion
-    if valor_mayorista is not None:
-        data_dict["valor_mayorista"] = valor_mayorista
-    if categoria_id is not None:
-        data_dict["categoria_id"] = categoria_id
+    # Si hay imagen_url, la agregamos al payload
     if imagen_url:
-        data_dict["imagen_url"] = imagen_url
+        payload.imagen_url = imagen_url
 
-    payload = schemas.ProductoCreate(**data_dict)
     return await crud.crear_producto(db, payload)
 
 @router.put("/{producto_id}", response_model=schemas.ProductoRead)
 async def actualizar_producto(
     producto_id: int,
-    nombre: Optional[str] = Query(None),
-    descripcion: Optional[str] = Query(None),
-    cantidad: Optional[int] = Query(None),
-    valor_unitario: Optional[float] = Query(None),
-    valor_mayorista: Optional[float] = Query(None),
-    categoria_id: Optional[int] = Query(None),
+    payload: schemas.ProductoUpdate,
     imagen: Optional[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
 ):
@@ -81,15 +59,10 @@ async def actualizar_producto(
         # 👇 usamos folder="productos"
         imagen_url = await upload_image_to_supabase(imagen, folder="productos")
 
-    payload = schemas.ProductoUpdate(
-        nombre=nombre,
-        descripcion=descripcion,
-        cantidad=cantidad,
-        valor_unitario=valor_unitario,
-        valor_mayorista=valor_mayorista,
-        categoria_id=categoria_id,
-        imagen_url=imagen_url,
-    )
+    # Si hay imagen_url, la agregamos al payload
+    if imagen_url:
+        payload.imagen_url = imagen_url
+
     return await crud.actualizar_producto(db, producto_id, payload)
 
 @router.delete("/{producto_id}", status_code=status.HTTP_204_NO_CONTENT)

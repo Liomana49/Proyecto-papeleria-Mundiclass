@@ -36,13 +36,12 @@ async def listar_categorias(
     status_code=status.HTTP_201_CREATED,
 )
 async def crear_categoria(
-    nombre: str = Query(...),
-    codigo: Optional[str] = Query(None),
+    payload: schemas.CategoriaCreate,
     imagen: Optional[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
 ):
     # Si hay imagen, la subimos a Supabase y obtenemos la URL pública
-    url_publica: Optional[str] = None
+    imagen_url: Optional[str] = None
     if imagen:
         if not imagen.content_type or not imagen.content_type.startswith("image/"):
             raise HTTPException(
@@ -50,25 +49,19 @@ async def crear_categoria(
                 detail="El archivo debe ser una imagen (jpg, png, etc.)",
             )
         # 👇 usamos folder="categorias"
-        url_publica = await upload_image_to_supabase(imagen, folder="categorias")
+        imagen_url = await upload_image_to_supabase(imagen, folder="categorias")
 
-    # Construimos el dict de datos para el schema
-    data_dict = {"nombre": nombre}
-    if codigo:
-        data_dict["codigo"] = codigo
-    if url_publica:
-        data_dict["imagen_url"] = url_publica
+    # Si hay imagen_url, la agregamos al payload
+    if imagen_url:
+        payload.imagen_url = imagen_url
 
-    payload = schemas.CategoriaCreate(**data_dict)
-    categoria = await crud.crear_categoria(db, payload)
-    return categoria
+    return await crud.crear_categoria(db, payload)
 
 
 @router.put("/{categoria_id}", response_model=schemas.CategoriaRead)
 async def actualizar_categoria(
     categoria_id: int,
-    nombre: Optional[str] = Query(None),
-    codigo: Optional[str] = Query(None),
+    payload: schemas.CategoriaUpdate,
     imagen: Optional[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
 ):
@@ -82,9 +75,11 @@ async def actualizar_categoria(
         # 👇 nuevamente folder="categorias"
         imagen_url = await upload_image_to_supabase(imagen, folder="categorias")
 
-    payload = schemas.CategoriaUpdate(nombre=nombre, codigo=codigo, imagen_url=imagen_url)
-    categoria = await crud.actualizar_categoria(db, categoria_id, payload)
-    return categoria
+    # Si hay imagen_url, la agregamos al payload
+    if imagen_url:
+        payload.imagen_url = imagen_url
+
+    return await crud.actualizar_categoria(db, categoria_id, payload)
 
 
 @router.delete("/{categoria_id}", status_code=status.HTTP_204_NO_CONTENT)
