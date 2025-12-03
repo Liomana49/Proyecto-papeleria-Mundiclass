@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Venta - Inventario y Ventas API</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/">Inicio</a>
+        <div class="dropdown">
+            <button class="dropbtn">Categorías</button>
+            <div class="dropdown-content">
+                <a href="../categorias/read.html">Ver Categorías</a>
+                <a href="../categorias/create.html">Crear Categoría</a>
+                <a href="../categorias/update.html">Actualizar Categoría</a>
+                <a href="../categorias/delete.html">Eliminar Categoría</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Productos</button>
+            <div class="dropdown-content">
+                <a href="../productos/read.html">Ver Productos</a>
+                <a href="../productos/create.html">Crear Producto</a>
+                <a href="../productos/update.html">Actualizar Producto</a>
+                <a href="../productos/delete.html">Eliminar Producto</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Clientes</button>
+            <div class="dropdown-content">
+                <a href="../clientes/read.html">Ver Clientes</a>
+                <a href="../clientes/create.html">Crear Cliente</a>
+                <a href="../clientes/update.html">Actualizar Cliente</a>
+                <a href="../clientes/delete.html">Eliminar Cliente</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Ventas</button>
+            <div class="dropdown-content">
+                <a href="read.html">Ver Ventas</a>
+                <a href="create.html">Crear Venta</a>
+                <a href="update.html">Actualizar Venta</a>
+                <a href="delete.html">Eliminar Venta</a>
+            </div>
+        </div>
+        <a href="/historial.html">Historial</a>
+        <a href="/planning.html">Planificación</a>
+        <a href="/informacion_del_proyecto.html">Información del Proyecto</a>
+    </nav>
+
+    <div class="container">
+        <h1>Eliminar Venta</h1>
+
+        <div id="ventas-list">
+            <p>Cargando ventas...</p>
+        </div>
+    </div>
+
+    <script>
+        async function loadVentas() {
+            try {
+                const response = await fetch('/compras');  // Assuming ventas are compras
+                const ventas = await response.json();
+                const listDiv = document.getElementById('ventas-list');
+
+                if (ventas.length === 0) {
+                    listDiv.innerHTML = '<p>No hay ventas disponibles.</p>';
+                    return;
+                }
+
+                let html = '<table><thead><tr><th>ID</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Precio Unitario</th><th>Total</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
+                ventas.forEach(venta => {
+                    html += `<tr>
+                        <td>${venta.id}</td>
+                        <td>${venta.cliente ? venta.cliente.nombre : 'N/A'}</td>
+                        <td>${venta.producto ? venta.producto.nombre : 'N/A'}</td>
+                        <td>${venta.cantidad}</td>
+                        <td>${venta.precio_unitario_aplicado}</td>
+                        <td>${venta.total}</td>
+                        <td>${venta.fecha}</td>
+                        <td><button onclick="deleteVenta(${venta.id})">Eliminar</button></td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                listDiv.innerHTML = html;
+            } catch (error) {
+                document.getElementById('ventas-list').innerHTML = '<p>Error al cargar ventas.</p>';
+                console.error('Error:', error);
+            }
+        }
+
+        async function deleteVenta(id) {
+            if (!confirm('¿Estás seguro de que quieres eliminar esta venta?')) return;
+
+            try {
+                const response = await fetch(`/compras/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Venta eliminada exitosamente');
+                    loadVentas();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.detail);
+                }
+            } catch (error) {
+                alert('Error de red: ' + error.message);
+            }
+        }
+
+        window.onload = loadVentas;
+    </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Producto - Inventario y Ventas API</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/">Inicio</a>
+        <div class="dropdown">
+            <button class="dropbtn">Categorías</button>
+            <div class="dropdown-content">
+                <a href="../categorias/read.html">Ver Categorías</a>
+                <a href="../categorias/create.html">Crear Categoría</a>
+                <a href="../categorias/update.html">Actualizar Categoría</a>
+                <a href="../categorias/delete.html">Eliminar Categoría</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Productos</button>
+            <div class="dropdown-content">
+                <a href="read.html">Ver Productos</a>
+                <a href="create.html">Crear Producto</a>
+                <a href="update.html">Actualizar Producto</a>
+                <a href="delete.html">Eliminar Producto</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Clientes</button>
+            <div class="dropdown-content">
+                <a href="../clientes/read.html">Ver Clientes</a>
+                <a href="../clientes/create.html">Crear Cliente</a>
+                <a href="../clientes/update.html">Actualizar Cliente</a>
+                <a href="../clientes/delete.html">Eliminar Cliente</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Ventas</button>
+            <div class="dropdown-content">
+                <a href="../ventas/read.html">Ver Ventas</a>
+                <a href="../ventas/create.html">Crear Venta</a>
+            </div>
+        </div>
+        <a href="/historial.html">Historial</a>
+        <a href="/planning.html">Planificación</a>
+        <a href="/informacion_del_proyecto.html">Información del Proyecto</a>
+    </nav>
+
+    <div class="container">
+        <h1>Actualizar Producto</h1>
+
+        <div id="productos-list">
+            <p>Cargando productos...</p>
+        </div>
+    </div>
+
+    <script>
+        async function loadProductos() {
+            try {
+                const response = await fetch('/productos');
+                const productos = await response.json();
+                const listDiv = document.getElementById('productos-list');
+
+                if (productos.length === 0) {
+                    listDiv.innerHTML = '<p>No hay productos disponibles.</p>';
+                    return;
+                }
+
+                let html = '<table><thead><tr><th>ID</th><th>Nombre</th><th>Descripción</th><th>Cantidad</th><th>Valor Unitario</th><th>Valor Mayorista</th><th>Categoría ID</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody>';
+                productos.forEach(producto => {
+                    html += `<tr>
+                        <td>${producto.id}</td>
+                        <td><input type="text" value="${producto.nombre}" id="nombre-${producto.id}" /></td>
+                        <td><textarea id="descripcion-${producto.id}">${producto.descripcion || ''}</textarea></td>
+                        <td><input type="number" value="${producto.cantidad}" id="cantidad-${producto.id}" /></td>
+                        <td><input type="number" step="0.01" value="${producto.valor_unitario}" id="valor_unitario-${producto.id}" /></td>
+                        <td><input type="number" step="0.01" value="${producto.valor_mayorista || ''}" id="valor_mayorista-${producto.id}" /></td>
+                        <td><input type="number" value="${producto.categoria_id || ''}" id="categoria_id-${producto.id}" /></td>
+                        <td><input type="file" id="imagen-${producto.id}" accept="image/*" /></td>
+                        <td><button onclick="updateProducto(${producto.id})">Actualizar</button></td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                listDiv.innerHTML = html;
+            } catch (error) {
+                document.getElementById('productos-list').innerHTML = '<p>Error al cargar productos.</p>';
+                console.error('Error:', error);
+            }
+        }
+
+        async function updateProducto(id) {
+            const nombre = document.getElementById(`nombre-${id}`).value;
+            const descripcion = document.getElementById(`descripcion-${id}`).value;
+            const cantidad = document.getElementById(`cantidad-${id}`).value;
+            const valor_unitario = document.getElementById(`valor_unitario-${id}`).value;
+            const valor_mayorista = document.getElementById(`valor_mayorista-${id}`).value;
+            const categoria_id = document.getElementById(`categoria_id-${id}`).value;
+            const imagenInput = document.getElementById(`imagen-${id}`);
+            const formData = new FormData();
+            formData.append('nombre', nombre);
+            if (descripcion) formData.append('descripcion', descripcion);
+            formData.append('cantidad', cantidad);
+            formData.append('valor_unitario', valor_unitario);
+            if (valor_mayorista) formData.append('valor_mayorista', valor_mayorista);
+            if (categoria_id) formData.append('categoria_id', categoria_id);
+            if (imagenInput.files[0]) formData.append('imagen', imagenInput.files[0]);
+
+            try {
+                const response = await fetch(`/productos/${id}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('Producto actualizado exitosamente');
+                    loadProductos();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.detail);
+                }
+            } catch (error) {
+                alert('Error de red: ' + error.message);
+            }
+        }
+
+        window.onload = loadProductos;
+    </script>
+</body>
+</html>

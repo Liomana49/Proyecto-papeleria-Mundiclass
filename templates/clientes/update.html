@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Cliente - Inventario y Ventas API</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/">Inicio</a>
+        <div class="dropdown">
+            <button class="dropbtn">Categorías</button>
+            <div class="dropdown-content">
+                <a href="../categorias/read.html">Ver Categorías</a>
+                <a href="../categorias/create.html">Crear Categoría</a>
+                <a href="../categorias/update.html">Actualizar Categoría</a>
+                <a href="../categorias/delete.html">Eliminar Categoría</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Productos</button>
+            <div class="dropdown-content">
+                <a href="../productos/read.html">Ver Productos</a>
+                <a href="../productos/create.html">Crear Producto</a>
+                <a href="../productos/update.html">Actualizar Producto</a>
+                <a href="../productos/delete.html">Eliminar Producto</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Clientes</button>
+            <div class="dropdown-content">
+                <a href="read.html">Ver Clientes</a>
+                <a href="create.html">Crear Cliente</a>
+                <a href="update.html">Actualizar Cliente</a>
+                <a href="delete.html">Eliminar Cliente</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Ventas</button>
+            <div class="dropdown-content">
+                <a href="../ventas/read.html">Ver Ventas</a>
+                <a href="../ventas/create.html">Crear Venta</a>
+            </div>
+        </div>
+        <a href="/historial.html">Historial</a>
+        <a href="/planning.html">Planificación</a>
+        <a href="/informacion_del_proyecto.html">Información del Proyecto</a>
+    </nav>
+
+    <div class="container">
+        <h1>Actualizar Cliente</h1>
+
+        <div id="clientes-list">
+            <p>Cargando clientes...</p>
+        </div>
+    </div>
+
+    <script>
+        async function loadClientes() {
+            try {
+                const response = await fetch('/clientes');
+                const clientes = await response.json();
+                const listDiv = document.getElementById('clientes-list');
+
+                if (clientes.length === 0) {
+                    listDiv.innerHTML = '<p>No hay clientes disponibles.</p>';
+                    return;
+                }
+
+                let html = '<table><thead><tr><th>ID</th><th>Nombre</th><th>Cédula</th><th>Correo</th><th>Teléfono</th><th>Dirección</th><th>Acciones</th></tr></thead><tbody>';
+                clientes.forEach(cliente => {
+                    html += `<tr>
+                        <td>${cliente.id}</td>
+                        <td><input type="text" value="${cliente.nombre}" id="nombre-${cliente.id}" /></td>
+                        <td><input type="text" value="${cliente.cedula}" id="cedula-${cliente.id}" /></td>
+                        <td><input type="email" value="${cliente.correo}" id="correo-${cliente.id}" /></td>
+                        <td><input type="tel" value="${cliente.telefono || ''}" id="telefono-${cliente.id}" /></td>
+                        <td><textarea id="direccion-${cliente.id}">${cliente.direccion || ''}</textarea></td>
+                        <td><button onclick="updateCliente(${cliente.id})">Actualizar</button></td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                listDiv.innerHTML = html;
+            } catch (error) {
+                document.getElementById('clientes-list').innerHTML = '<p>Error al cargar clientes.</p>';
+                console.error('Error:', error);
+            }
+        }
+
+        async function updateCliente(id) {
+            const nombre = document.getElementById(`nombre-${id}`).value;
+            const cedula = document.getElementById(`cedula-${id}`).value;
+            const correo = document.getElementById(`correo-${id}`).value;
+            const telefono = document.getElementById(`telefono-${id}`).value;
+            const direccion = document.getElementById(`direccion-${id}`).value;
+            const data = { nombre, cedula, correo };
+            if (telefono) data.telefono = telefono;
+            if (direccion) data.direccion = direccion;
+
+            try {
+                const response = await fetch(`/clientes/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Cliente actualizado exitosamente');
+                    loadClientes();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.detail);
+                }
+            } catch (error) {
+                alert('Error de red: ' + error.message);
+            }
+        }
+
+        window.onload = loadClientes;
+    </script>
+</body>
+</html>

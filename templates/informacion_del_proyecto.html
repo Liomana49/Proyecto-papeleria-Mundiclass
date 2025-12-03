@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información del Proyecto - Inventario y Ventas API</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="/">Inicio</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Usuarios</a>
+                <div class="dropdown-content">
+                    <a href="/usuarios_list.html">Listar</a>
+                    <a href="/usuarios_create.html">Crear</a>
+                    <a href="/usuarios_update.html">Actualizar</a>
+                    <a href="/usuarios_delete.html">Eliminar</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Productos</a>
+                <div class="dropdown-content">
+                    <a href="/productos/read.html">Listar</a>
+                    <a href="/productos/create.html">Crear</a>
+                    <a href="/productos/update.html">Actualizar</a>
+                    <a href="/productos/delete.html">Eliminar</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Clientes</a>
+                <div class="dropdown-content">
+                    <a href="/clientes/read.html">Listar</a>
+                    <a href="/clientes/create.html">Crear</a>
+                    <a href="/clientes/update.html">Actualizar</a>
+                    <a href="/clientes/delete.html">Eliminar</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Ventas</a>
+                <div class="dropdown-content">
+                    <a href="/ventas/read.html">Listar</a>
+                    <a href="/ventas/create.html">Crear</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Categorías</a>
+                <div class="dropdown-content">
+                    <a href="/categorias/read.html">Listar</a>
+                    <a href="/categorias/create.html">Crear</a>
+                    <a href="/categorias/update.html">Actualizar</a>
+                    <a href="/categorias/delete.html">Eliminar</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Historial</a>
+                <div class="dropdown-content">
+                    <a href="/historial.html">Listar</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Planificación</a>
+                <div class="dropdown-content">
+                    <a href="/planning.html">Listar</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="main-content">
+            <h1>Información del Proyecto</h1>
+
+            <h2>Descripción General</h2>
+            <p>Este proyecto es una API RESTful completa para la gestión de inventarios y ventas, desarrollada con FastAPI y PostgreSQL. El sistema permite manejar productos, clientes, ventas, categorías y usuarios con funcionalidades avanzadas como subida de imágenes y auditoría de eliminaciones.</p>
+
+            <h2>Arquitectura del Sistema</h2>
+            <ul>
+                <li><strong>Backend:</strong> FastAPI con SQLAlchemy ORM</li>
+                <li><strong>Base de Datos:</strong> PostgreSQL</li>
+                <li><strong>Autenticación:</strong> JWT tokens</li>
+                <li><strong>Almacenamiento de Imágenes:</strong> Supabase</li>
+                <li><strong>Documentación:</strong> Swagger UI y ReDoc</li>
+            </ul>
+
+            <h2>Modelos de Datos</h2>
+            <h3>Usuario</h3>
+            <ul>
+                <li>ID (UUID)</li>
+                <li>Nombre (string)</li>
+                <li>Cédula (string)</li>
+                <li>Correo (string, único)</li>
+                <li>Rol (enum: admin, vendedor, cliente)</li>
+                <li>Fecha de creación (datetime)</li>
+            </ul>
+
+            <h3>Producto</h3>
+            <ul>
+                <li>ID (UUID)</li>
+                <li>Nombre (string)</li>
+                <li>Descripción (text)</li>
+                <li>Cantidad (integer)</li>
+                <li>Valor unitario (decimal)</li>
+                <li>Valor mayorista (decimal)</li>
+                <li>Categoría ID (UUID, FK)</li>
+                <li>Imagen URL (string)</li>
+                <li>Fecha de creación (datetime)</li>
+            </ul>
+
+            <h3>Cliente</h3>
+            <ul>
+                <li>ID (UUID)</li>
+                <li>Nombre (string)</li>
+                <li>Cédula (string)</li>
+                <li>Correo (string)</li>
+                <li>Teléfono (string)</li>
+                <li>Dirección (text)</li>
+                <li>Fecha de creación (datetime)</li>
+            </ul>
+
+            <h3>Venta</h3>
+            <ul>
+                <li>ID (UUID)</li>
+                <li>Cliente ID (UUID, FK)</li>
+                <li>Producto ID (UUID, FK)</li>
+                <li>Cantidad (integer)</li>
+                <li>Precio unitario aplicado (decimal)</li>
+                <li>Total (decimal, calculado)</li>
+                <li>Fecha de creación (datetime)</li>
+            </ul>
+
+            <h3>Categoría</h3>
+            <ul>
+                <li>ID (UUID)</li>
+                <li>Nombre (string)</li>
+                <li>Código (string)</li>
+                <li>Imagen URL (string)</li>
+                <li>Fecha de creación (datetime)</li>
+            </ul>
+
+            <h2>Endpoints Principales</h2>
+            <ul>
+                <li><code>GET /</code> - Estado general de la API</li>
+                <li><code>GET /health</code> - Verificación de salud</li>
+                <li><code>GET /docs</code> - Documentación Swagger UI</li>
+                <li><code>GET /redoc</code> - Documentación ReDoc</li>
+            </ul>
+
+            <h2>Desarrollador</h2>
+            <p>Proyecto desarrollado por [Nombre del Desarrollador]</p>
+            <p>Fecha de desarrollo: [Fecha]</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Inventario y Ventas API. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

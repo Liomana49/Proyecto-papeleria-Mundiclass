@@ -4,279 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio - Inventario y Ventas API</title>
-    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <nav class="navbar">
-        <ul>
-            <li><a href="/">Inicio</a></li>
-            <li class="dropdown">
-                <a href="#" class="dropbtn">Usuarios</a>
-                <div class="dropdown-content">
-                    <a href="/usuarios_list.html">Listar</a>
-                    <a href="/usuarios_create.html">Crear</a>
-                    <a href="/usuarios_update.html">Actualizar</a>
-                    <a href="/usuarios_delete.html">Eliminar</a>
-                </div>
-            </li>
-            <li class="dropdown">
-                <a href="#" class="dropbtn">Productos</a>
-                <div class="dropdown-content">
-                    <a href="/productos_list.html">Listar</a>
-                    <a href="/productos_create.html">Crear</a>
-                    <a href="/productos_update.html">Actualizar</a>
-                    <a href="/productos_delete.html">Eliminar</a>
-                </div>
-            </li>
-            <li class="dropdown">
-                <a href="#" class="dropbtn">Clientes</a>
-                <div class="dropdown-content">
-                    <a href="/clientes_list.html">Listar</a>
-                    <a href="/clientes_create.html">Crear</a>
-                    <a href="/clientes_update.html">Actualizar</a>
-                    <a href="/clientes_delete.html">Eliminar</a>
-                </div>
-            </li>
-            <li class="dropdown">
-                <a href="#" class="dropbtn">Compras</a>
-                <div class="dropdown-content">
-                    <a href="/compras_list.html">Listar</a>
-                    <a href="/compras_create.html">Crear</a>
-                    <a href="/compras_update.html">Actualizar</a>
-                    <a href="/compras_delete.html">Eliminar</a>
-                </div>
-            </li>
-            <li class="dropdown">
-                <a href="#" class="dropbtn">Categorías</a>
-                <div class="dropdown-content">
-                    <a href="/categorias_list.html">Listar</a>
-                    <a href="/categorias_create.html">Crear</a>
-                    <a href="/categorias_update.html">Actualizar</a>
-                    <a href="/categorias_delete.html">Eliminar</a>
-                </div>
-            </li>
-            <li class="dropdown">
-                <a href="#" class="dropbtn">Historial</a>
-                <div class="dropdown-content">
-                    <a href="/historial_list.html">Listar</a>
-                    <a href="/historial_create.html">Crear</a>
-                    <a href="/historial_update.html">Actualizar</a>
-                    <a href="/historial_delete.html">Eliminar</a>
-                </div>
-            </li>
-            <li class="dropdown">
-                <a href="#" class="dropbtn">Planificación</a>
-                <div class="dropdown-content">
-                    <a href="/planning_list.html">Listar</a>
-                    <a href="/planning_create.html">Crear</a>
-                    <a href="/planning_update.html">Actualizar</a>
-                    <a href="/planning_delete.html">Eliminar</a>
-                </div>
-            </li>
-        </ul>
+        <a href="/">Inicio</a>
+        <div class="dropdown">
+            <button class="dropbtn">Categorías</button>
+            <div class="dropdown-content">
+                <a href="categorias/read.html">Ver Categorías</a>
+                <a href="categorias/create.html">Crear Categoría</a>
+                <a href="categorias/update.html">Actualizar Categoría</a>
+                <a href="categorias/delete.html">Eliminar Categoría</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Productos</button>
+            <div class="dropdown-content">
+                <a href="productos/read.html">Ver Productos</a>
+                <a href="productos/create.html">Crear Producto</a>
+                <a href="productos/update.html">Actualizar Producto</a>
+                <a href="productos/delete.html">Eliminar Producto</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Clientes</button>
+            <div class="dropdown-content">
+                <a href="clientes/read.html">Ver Clientes</a>
+                <a href="clientes/create.html">Crear Cliente</a>
+                <a href="clientes/update.html">Actualizar Cliente</a>
+                <a href="clientes/delete.html">Eliminar Cliente</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Ventas</button>
+            <div class="dropdown-content">
+                <a href="ventas/read.html">Ver Ventas</a>
+                <a href="ventas/create.html">Crear Venta</a>
+                <a href="ventas/update.html">Actualizar Venta</a>
+                <a href="ventas/delete.html">Eliminar Venta</a>
+            </div>
+        </div>
+        <a href="/historial.html">Historial</a>
+        <a href="/planning.html">Planificación</a>
+        <a href="/informacion_del_proyecto.html">Información del Proyecto</a>
     </nav>
 
     <div class="container">
-        <div class="main-content">
-            <h1>Bienvenido a la API de Inventario y Ventas</h1>
-
-            <h2>Presentación del Proyecto</h2>
-            <p>Esta API asíncrona está diseñada para gestionar de manera eficiente un sistema de inventario y ventas. Utiliza FastAPI para proporcionar una interfaz robusta y escalable, con soporte para operaciones CRUD completas en usuarios, productos, clientes, compras, categorías y un historial de eliminaciones.</p>
-
-            <h2>Objetivos del Proyecto</h2>
-            <ul>
-                <li>Proporcionar una API RESTful completa para la gestión de inventarios y ventas</li>
-                <li>Implementar operaciones asíncronas para un rendimiento óptimo</li>
-                <li>Incluir funcionalidades avanzadas como subida de imágenes con Supabase</li>
-                <li>Mantener un historial auditado de todas las eliminaciones</li>
-                <li>Ofrecer documentación automática con Swagger UI y ReDoc</li>
-                <li>Garantizar la integridad de datos con validaciones Pydantic</li>
-                <li>Soportar CORS para integración con frontends</li>
-            </ul>
-
-            <h2>Características Principales</h2>
-            <ul>
-                <li><strong>Gestión de Usuarios:</strong> Crear, leer, actualizar y eliminar usuarios con roles definidos</li>
-                <li><strong>Catálogo de Productos:</strong> Manejar inventario con imágenes, precios unitarios y mayoristas</li>
-                <li><strong>Base de Clientes:</strong> Mantener información detallada de clientes</li>
-                <li><strong>Registro de Compras:</strong> Trackear ventas con cálculos automáticos de totales</li>
-                <li><strong>Organización por Categorías:</strong> Clasificar productos con soporte para imágenes</li>
-                <li><strong>Historial de Eliminaciones:</strong> Auditoría completa de datos eliminados</li>
-                <li><strong>Subida de Imágenes:</strong> Integración con Supabase para almacenamiento en la nube</li>
-            </ul>
-
-            <h2>Tecnologías Utilizadas</h2>
-            <ul>
-                <li><strong>FastAPI:</strong> Framework web asíncrono para Python</li>
-                <li><strong>SQLAlchemy:</strong> ORM para interacciones con base de datos</li>
-                <li><strong>PostgreSQL:</strong> Base de datos relacional</li>
-                <li><strong>Pydantic:</strong> Validación de datos</li>
-                <li><strong>Supabase:</strong> Almacenamiento de imágenes en la nube</li>
-                <li><strong>Uvicorn:</strong> Servidor ASGI</li>
-            </ul>
-
-            <h2>Documentación de la API</h2>
-            <p>Accede a la documentación interactiva en:</p>
-            <ul>
-                <li><a href="/docs" target="_blank">Swagger UI</a></li>
-                <li><a href="/redoc" target="_blank">ReDoc</a></li>
-                <li><a href="/openapi.json" target="_blank">OpenAPI JSON</a></li>
-            </ul>
-
-            <h2>Estado de Salud</h2>
-            <p>Verifica el estado de la API en: <a href="/health">/health</a></p>
-        </div>
+        <h1>Bienvenido a la API de Inventario y Ventas</h1>
+        <p>Esta aplicación permite gestionar categorías, productos, clientes y ventas de manera eficiente.</p>
+        <p>Utiliza el menú de navegación para acceder a las diferentes secciones.</p>
     </div>
-
-    <footer>
-        <p>&copy; 2023 Inventario y Ventas API. Todos los derechos reservados.</p>
-    </footer>
-
-    <script>
-        // Función genérica para cargar datos
-        async function cargarDatos(endpoint, listId, displayFunc) {
-            try {
-                const response = await fetch(endpoint);
-                const data = await response.json();
-                const list = document.getElementById(listId);
-                list.innerHTML = displayFunc(data);
-            } catch (error) {
-                console.error('Error al cargar datos:', error);
-                document.getElementById(listId).innerHTML = '<p>Error al cargar datos.</p>';
-            }
-        }
-
-        // Función para enviar formulario
-        async function enviarFormulario(formId, endpoint, successCallback) {
-            const form = document.getElementById(formId);
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const data = Object.fromEntries(formData);
-                try {
-                    const response = await fetch(endpoint, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-                    if (response.ok) {
-                        alert('Operación exitosa');
-                        e.target.reset();
-                        if (successCallback) successCallback();
-                    } else {
-                        alert('Error en la operación');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error en la operación');
-                }
-            });
-        }
-
-        // Funciones de display
-        function displayUsuarios(usuarios) {
-            return '<ul>' + usuarios.map(u => `<li>ID: ${u.id}, ${u.nombre} - ${u.correo} <button onclick="eliminarUsuario(${u.id})">Eliminar</button></li>`).join('') + '</ul>';
-        }
-
-        function displayProductos(productos) {
-            return '<ul>' + productos.map(p => `<li>ID: ${p.id}, ${p.nombre} - Cantidad: ${p.cantidad} <button onclick="eliminarProducto(${p.id})">Eliminar</button></li>`).join('') + '</ul>';
-        }
-
-        function displayClientes(clientes) {
-            return '<ul>' + clientes.map(c => `<li>ID: ${c.id}, ${c.nombre} - ${c.correo} <button onclick="eliminarCliente(${c.id})">Eliminar</button></li>`).join('') + '</ul>';
-        }
-
-        function displayCompras(compras) {
-            return '<ul>' + compras.map(c => `<li>ID: ${c.id}, Cliente: ${c.cliente_id}, Producto: ${c.producto_id}, Total: ${c.total} <button onclick="eliminarCompra(${c.id})">Eliminar</button></li>`).join('') + '</ul>';
-        }
-
-        function displayCategorias(categorias) {
-            return '<ul>' + categorias.map(c => `<li>ID: ${c.id}, ${c.nombre} <button onclick="eliminarCategoria(${c.id})">Eliminar</button></li>`).join('') + '</ul>';
-        }
-
-        function displayHistorial(historial) {
-            return '<ul>' + historial.map(h => `<li>${h.tabla} - ID: ${h.id_elemento}, Eliminado: ${h.fecha_eliminacion}</li>`).join('') + '</ul>';
-        }
-
-        // Funciones de eliminación
-        async function eliminarUsuario(id) {
-            if (confirm('¿Eliminar usuario?')) {
-                try {
-                    await fetch(`/usuarios/${id}`, { method: 'DELETE' });
-                    cargarUsuarios();
-                } catch (error) {
-                    alert('Error al eliminar');
-                }
-            }
-        }
-
-        async function eliminarProducto(id) {
-            if (confirm('¿Eliminar producto?')) {
-                try {
-                    await fetch(`/productos/${id}`, { method: 'DELETE' });
-                    cargarProductos();
-                } catch (error) {
-                    alert('Error al eliminar');
-                }
-            }
-        }
-
-        async function eliminarCliente(id) {
-            if (confirm('¿Eliminar cliente?')) {
-                try {
-                    await fetch(`/clientes/${id}`, { method: 'DELETE' });
-                    cargarClientes();
-                } catch (error) {
-                    alert('Error al eliminar');
-                }
-            }
-        }
-
-        async function eliminarCompra(id) {
-            if (confirm('¿Eliminar compra?')) {
-                try {
-                    await fetch(`/compras/${id}`, { method: 'DELETE' });
-                    cargarCompras();
-                } catch (error) {
-                    alert('Error al eliminar');
-                }
-            }
-        }
-
-        async function eliminarCategoria(id) {
-            if (confirm('¿Eliminar categoría?')) {
-                try {
-                    await fetch(`/categorias/${id}`, { method: 'DELETE' });
-                    cargarCategorias();
-                } catch (error) {
-                    alert('Error al eliminar');
-                }
-            }
-        }
-
-        // Funciones de carga
-        function cargarUsuarios() { cargarDatos('/usuarios', 'usuarios-list', displayUsuarios); }
-        function cargarProductos() { cargarDatos('/productos', 'productos-list', displayProductos); }
-        function cargarClientes() { cargarDatos('/clientes', 'clientes-list', displayClientes); }
-        function cargarCompras() { cargarDatos('/compras', 'compras-list', displayCompras); }
-        function cargarCategorias() { cargarDatos('/categorias', 'categorias-list', displayCategorias); }
-        function cargarHistorial() { cargarDatos('/historial/eliminados', 'historial-list', displayHistorial); }
-
-        // Inicializar
-        window.onload = () => {
-            cargarUsuarios();
-            cargarProductos();
-            cargarClientes();
-            cargarCompras();
-            cargarCategorias();
-            cargarHistorial();
-
-            // Configurar formularios
-            enviarFormulario('create-product-form', '/productos', cargarProductos);
-            enviarFormulario('create-client-form', '/clientes', cargarClientes);
-            enviarFormulario('create-compra-form', '/compras', cargarCompras);
-            enviarFormulario('create-categoria-form', '/categorias', cargarCategorias);
-        };
-    </script>
 </body>
 </html>

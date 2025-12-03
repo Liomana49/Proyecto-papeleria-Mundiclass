@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Categoría - Inventario y Ventas API</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/">Inicio</a>
+        <div class="dropdown">
+            <button class="dropbtn">Categorías</button>
+            <div class="dropdown-content">
+                <a href="read.html">Ver Categorías</a>
+                <a href="create.html">Crear Categoría</a>
+                <a href="update.html">Actualizar Categoría</a>
+                <a href="delete.html">Eliminar Categoría</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Productos</button>
+            <div class="dropdown-content">
+                <a href="../productos/read.html">Ver Productos</a>
+                <a href="../productos/create.html">Crear Producto</a>
+                <a href="../productos/update.html">Actualizar Producto</a>
+                <a href="../productos/delete.html">Eliminar Producto</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Clientes</button>
+            <div class="dropdown-content">
+                <a href="../clientes/read.html">Ver Clientes</a>
+                <a href="../clientes/create.html">Crear Cliente</a>
+                <a href="../clientes/update.html">Actualizar Cliente</a>
+                <a href="../clientes/delete.html">Eliminar Cliente</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Ventas</button>
+            <div class="dropdown-content">
+                <a href="../ventas/read.html">Ver Ventas</a>
+                <a href="../ventas/create.html">Crear Venta</a>
+            </div>
+        </div>
+        <a href="/historial.html">Historial</a>
+        <a href="/planning.html">Planificación</a>
+        <a href="/informacion_del_proyecto.html">Información del Proyecto</a>
+    </nav>
+
+    <div class="container">
+        <h1>Actualizar Categoría</h1>
+
+        <div id="categorias-list">
+            <p>Cargando categorías...</p>
+        </div>
+    </div>
+
+    <script>
+        async function loadCategorias() {
+            try {
+                const response = await fetch('/categorias');
+                const categorias = await response.json();
+                const listDiv = document.getElementById('categorias-list');
+
+                if (categorias.length === 0) {
+                    listDiv.innerHTML = '<p>No hay categorías disponibles.</p>';
+                    return;
+                }
+
+                let html = '<table><thead><tr><th>ID</th><th>Nombre</th><th>Código</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody>';
+                categorias.forEach(categoria => {
+                    html += `<tr>
+                        <td>${categoria.id}</td>
+                        <td><input type="text" value="${categoria.nombre}" id="nombre-${categoria.id}" /></td>
+                        <td><input type="text" value="${categoria.codigo || ''}" id="codigo-${categoria.id}" /></td>
+                        <td><input type="file" id="imagen-${categoria.id}" accept="image/*" /></td>
+                        <td><button onclick="updateCategoria(${categoria.id})">Actualizar</button></td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                listDiv.innerHTML = html;
+            } catch (error) {
+                document.getElementById('categorias-list').innerHTML = '<p>Error al cargar categorías.</p>';
+                console.error('Error:', error);
+            }
+        }
+
+        async function updateCategoria(id) {
+            const nombre = document.getElementById(`nombre-${id}`).value;
+            const codigo = document.getElementById(`codigo-${id}`).value;
+            const imagenInput = document.getElementById(`imagen-${id}`);
+            const formData = new FormData();
+            formData.append('nombre', nombre);
+            if (codigo) formData.append('codigo', codigo);
+            if (imagenInput.files[0]) formData.append('imagen', imagenInput.files[0]);
+
+            try {
+                const response = await fetch(`/categorias/${id}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('Categoría actualizada exitosamente');
+                    loadCategorias();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.detail);
+                }
+            } catch (error) {
+                alert('Error de red: ' + error.message);
+            }
+        }
+
+        window.onload = loadCategorias;
+    </script>
+</body>
+</html>

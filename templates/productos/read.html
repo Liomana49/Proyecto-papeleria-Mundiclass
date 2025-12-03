@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Productos - Inventario y Ventas API</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/">Inicio</a>
+        <div class="dropdown">
+            <button class="dropbtn">Categorías</button>
+            <div class="dropdown-content">
+                <a href="../categorias/read.html">Ver Categorías</a>
+                <a href="../categorias/create.html">Crear Categoría</a>
+                <a href="../categorias/update.html">Actualizar Categoría</a>
+                <a href="../categorias/delete.html">Eliminar Categoría</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Productos</button>
+            <div class="dropdown-content">
+                <a href="read.html">Ver Productos</a>
+                <a href="create.html">Crear Producto</a>
+                <a href="update.html">Actualizar Producto</a>
+                <a href="delete.html">Eliminar Producto</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Clientes</button>
+            <div class="dropdown-content">
+                <a href="../clientes/read.html">Ver Clientes</a>
+                <a href="../clientes/create.html">Crear Cliente</a>
+                <a href="../clientes/update.html">Actualizar Cliente</a>
+                <a href="../clientes/delete.html">Eliminar Cliente</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Ventas</button>
+            <div class="dropdown-content">
+                <a href="../ventas/read.html">Ver Ventas</a>
+                <a href="../ventas/create.html">Crear Venta</a>
+            </div>
+        </div>
+        <a href="/historial.html">Historial</a>
+        <a href="/planning.html">Planificación</a>
+        <a href="/informacion_del_proyecto.html">Información del Proyecto</a>
+    </nav>
+
+    <div class="container">
+        <h1>Ver Productos</h1>
+
+        <div id="productos-list">
+            <p>Cargando productos...</p>
+        </div>
+    </div>
+
+    <script>
+        async function loadProductos() {
+            try {
+                const response = await fetch('/productos');
+                const productos = await response.json();
+                const listDiv = document.getElementById('productos-list');
+
+                if (productos.length === 0) {
+                    listDiv.innerHTML = '<p>No hay productos disponibles.</p>';
+                    return;
+                }
+
+                let html = '<table><thead><tr><th>ID</th><th>Nombre</th><th>Descripción</th><th>Cantidad</th><th>Valor Unitario</th><th>Valor Mayorista</th><th>Categoría</th><th>Imagen</th><th>Fecha de Creación</th></tr></thead><tbody>';
+                productos.forEach(producto => {
+                    html += `<tr>
+                        <td>${producto.id}</td>
+                        <td>${producto.nombre}</td>
+                        <td>${producto.descripcion || 'N/A'}</td>
+                        <td>${producto.cantidad}</td>
+                        <td>${producto.valor_unitario}</td>
+                        <td>${producto.valor_mayorista || 'N/A'}</td>
+                        <td>${producto.categoria ? producto.categoria.nombre : 'N/A'}</td>
+                        <td>${producto.imagen_url ? `<img src="${producto.imagen_url}" alt="Imagen" style="max-width: 50px;">` : 'N/A'}</td>
+                        <td>${producto.fecha_creacion}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                listDiv.innerHTML = html;
+            } catch (error) {
+                document.getElementById('productos-list').innerHTML = '<p>Error al cargar productos.</p>';
+                console.error('Error:', error);
+            }
+        }
+
+        window.onload = loadProductos;
+    </script>
+</body>
+</html>
