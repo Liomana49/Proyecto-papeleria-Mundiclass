@@ -25,7 +25,7 @@ body {
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     display: flex;
     justify-content: center;
-    /* Se añade un poco de padding vertical a la navbar en lugar de depender del margen de los botones */
+    /* Se añade padding vertical a la navbar, no a los elementos internos */
     padding: 5px 0; 
     height: auto;
 }
@@ -39,8 +39,7 @@ body {
     font-weight: 500;
     transition: all 0.3s ease;
     border-radius: 5px;
-    /* AJUSTE CLAVE 1: Eliminamos el margin vertical. 
-       El margin de 5px causaba el "gap" invisible */
+    /* CORRECCIÓN 1: Eliminamos el margin vertical, solo dejamos espaciado horizontal */
     margin: 0 5px;
 }
 
@@ -58,9 +57,9 @@ body {
 .dropdown-content {
     display: none;
     position: absolute;
-    /* AJUSTE CLAVE 2: Se usa top: 100% y no se necesita margin-top negativo,
-       ya que eliminamos el margin vertical del botón. */
+    /* CORRECCIÓN 2: top: 100% y forzamos una superposición con margin-top negativo */
     top: 100%;
+    margin-top: -3px; /* Fuerza el contenido a superponerse 3px con el borde inferior del botón */
     
     background-color: #f9f9f9;
     min-width: 200px;
@@ -83,6 +82,7 @@ body {
 }
 
 .dropdown:hover .dropdown-content {
+    /* Esta regla ahora es más robusta porque el cursor permanece en la zona de hover */
     display: block;
 }
 
