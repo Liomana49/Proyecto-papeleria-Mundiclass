@@ -15,9 +15,10 @@ async def listar_clientes(
     nombre: Optional[str] = None,
     cedula: Optional[str] = None,
     tipo_cliente: Optional[str] = None,
+    cliente_frecuente: Optional[bool] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.listar_clientes(db)
+    return await crud.listar_clientes(db, nombre=nombre, cedula=cedula, tipo_cliente=tipo_cliente, cliente_frecuente=cliente_frecuente)
 
 @router.post("/", response_model=schemas.ClienteRead, status_code=status.HTTP_201_CREATED)
 async def crear_cliente(payload: schemas.ClienteCreate, db: AsyncSession = Depends(get_db)):
@@ -29,11 +30,6 @@ async def actualizar_cliente(cliente_id: int, payload: schemas.ClienteUpdate, db
 
 @router.delete("/{cliente_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def eliminar_cliente(cliente_id: int, db: AsyncSession = Depends(get_db)):
-    cliente = await crud.obtener_cliente(db, cliente_id)
-
-    descripcion = f"Cliente '{cliente.nombre}' eliminado"
-
-    await crud._registrar_eliminado(db, "clientes", cliente.id, {"nombre": cliente.nombre})
     await crud.borrar_cliente(db, cliente_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 

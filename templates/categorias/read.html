@@ -9,44 +9,75 @@
 <body>
     <nav class="navbar">
         <a href="/">Inicio</a>
+
         <div class="dropdown">
             <button class="dropbtn">Categorías</button>
             <div class="dropdown-content">
                 <a href="/categorias">Ver Categorías</a>
                 <a href="/categorias/create">Crear Categoría</a>
                 <a href="/categorias/update">Actualizar Categoría</a>
+                <a href="/categorias/delete">Eliminar Categoría</a>
             </div>
         </div>
+
         <div class="dropdown">
             <button class="dropbtn">Productos</button>
             <div class="dropdown-content">
                 <a href="/productos">Ver Productos</a>
+                <a href="/productos/create">Crear Producto</a>
                 <a href="/productos/update">Actualizar Producto</a>
+                <a href="/productos/delete">Eliminar Producto</a>
             </div>
         </div>
+
         <div class="dropdown">
             <button class="dropbtn">Clientes</button>
             <div class="dropdown-content">
                 <a href="/clientes">Ver Clientes</a>
                 <a href="/clientes/create">Crear Cliente</a>
                 <a href="/clientes/update">Actualizar Cliente</a>
+                <a href="/clientes/delete">Eliminar Cliente</a>
             </div>
         </div>
+
         <div class="dropdown">
             <button class="dropbtn">Ventas</button>
             <div class="dropdown-content">
                 <a href="/ventas">Ver Ventas</a>
+                <a href="/ventas/create">Crear Venta</a>
                 <a href="/ventas/update">Actualizar Venta</a>
                 <a href="/ventas/delete">Eliminar Venta</a>
             </div>
         </div>
+
         <a href="/historial">Historial</a>
+        <a href="/graficas">Gráficas</a>
         <a href="/planning">Planificación</a>
-        <a href="/informacion-del-proyecto">Información del Proyecto</a>
+        <a href="/informacion_del_proyecto">Información del Proyecto</a>
     </nav>
+
+    {% include 'sidebar.html' %}
 
     <div class="container">
         <h1>Ver Categorías</h1>
+
+        <div class="filter-section" style="margin-bottom: 20px; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
+            <h3>Filtros</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                <div>
+                    <label for="filter-nombre">Nombre:</label>
+                    <input type="text" id="filter-nombre" placeholder="Buscar por nombre..." />
+                </div>
+                <div>
+                    <label for="filter-codigo">Código:</label>
+                    <input type="text" id="filter-codigo" placeholder="Buscar por código..." />
+                </div>
+                <div style="display: flex; align-items: flex-end; gap: 10px;">
+                    <button onclick="applyFilters()" style="flex: 1;">Buscar</button>
+                    <button onclick="clearFilters()" style="flex: 1;">Limpiar</button>
+                </div>
+            </div>
+        </div>
 
         <div id="categorias-list">
             <p>Cargando categorías...</p>
@@ -54,9 +85,19 @@
     </div>
 
     <script>
-        async function loadCategorias() {
+        async function loadCategorias(nombre = '', codigo = '') {
             try {
-                const response = await fetch('/api/categorias');
+                let url = '/api/categorias';
+                const params = new URLSearchParams();
+                
+                if (nombre) params.append('nombre', nombre);
+                if (codigo) params.append('codigo', codigo);
+                
+                if (params.toString()) {
+                    url += '?' + params.toString();
+                }
+
+                const response = await fetch(url);
                 const categorias = await response.json();
                 const listDiv = document.getElementById('categorias-list');
 
@@ -65,14 +106,15 @@
                     return;
                 }
 
-                let html = '<table><thead><tr><th>ID</th><th>Nombre</th><th>Código</th><th>Imagen</th><th>Fecha de Creación</th></tr></thead><tbody>';
+                let html = '<table><thead><tr><th>ID</th><th>Nombre</th><th>Código</th><th>Imagen</th><th>Fecha de Creación</th><th>Última Actualización</th></tr></thead><tbody>';
                 categorias.forEach(categoria => {
                     html += `<tr>
                         <td>${categoria.id}</td>
                         <td>${categoria.nombre}</td>
                         <td>${categoria.codigo || 'N/A'}</td>
-                        <td>${categoria.imagen_url ? `<img src="${categoria.imagen_url}" alt="Imagen" style="max-width: 50px;">` : 'N/A'}</td>
-                        <td>${categoria.fecha_creacion}</td>
+                        <td>${categoria.imagen_url ? `<img src="${categoria.imagen_url}" alt="Imagen" style="max-width: 50px; max-height: 50px;">` : 'N/A'}</td>
+                        <td>${new Date(categoria.creado_en).toLocaleDateString('es-ES')}</td>
+                        <td>${new Date(categoria.actualizado_en).toLocaleDateString('es-ES')}</td>
                     </tr>`;
                 });
                 html += '</tbody></table>';
@@ -83,7 +125,51 @@
             }
         }
 
-        window.onload = loadCategorias;
+        function applyFilters() {
+            const nombre = document.getElementById('filter-nombre').value;
+            const codigo = document.getElementById('filter-codigo').value;
+            loadCategorias(nombre, codigo);
+        }
+
+        function clearFilters() {
+            document.getElementById('filter-nombre').value = '';
+            document.getElementById('filter-codigo').value = '';
+            loadCategorias('', '');
+        }
+
+        window.onload = () => loadCategorias();
+
+        // Sidebar y submenu toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const body = document.body;
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            body.classList.toggle('sidebar-open');
+        }
+
+        function toggleSubmenu(element) {
+            element.classList.toggle('active');
+            const submenu = element.nextElementSibling;
+            if (submenu.style.maxHeight) {
+                submenu.style.maxHeight = null;
+            } else {
+                submenu.style.maxHeight = submenu.scrollHeight + "px";
+            }
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.querySelector('.hamburger-btn');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (!sidebar.contains(event.target) && !hamburger.contains(event.target) && sidebar.classList.contains('open')) {
+                toggleSidebar();
+            }
+        });
     </script>
 </body>
 </html>

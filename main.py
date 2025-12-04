@@ -72,54 +72,38 @@ async def health():
 
 
 # ==========================
-#   PÁGINAS HTML
+#   PÁGINAS HTML (Rutas Simplificadas)
 # ==========================
 
 # ---------- USUARIOS ----------
 
 @app.get("/usuarios", tags=["Pages"])
-async def usuarios_home(request: Request):
-    """Vista principal de usuarios (lista)."""
-    return templates.TemplateResponse("usuarios/read.html", {"request": request})
-
-
-@app.get("/usuarios/read", tags=["Pages"])
 async def usuarios_read_page(request: Request):
+    """Vista principal y listado de usuarios."""
     return templates.TemplateResponse("usuarios/read.html", {"request": request})
-
 
 @app.get("/usuarios/create", tags=["Pages"])
 async def usuarios_create_page(request: Request):
     return templates.TemplateResponse("usuarios/create.html", {"request": request})
 
-
 @app.get("/usuarios/update", tags=["Pages"])
 async def usuarios_update_page(request: Request):
     return templates.TemplateResponse("usuarios/update.html", {"request": request})
 
-
 # ---------- PRODUCTOS ----------
 
 @app.get("/productos", tags=["Pages"])
-async def productos_home(request: Request):
-    """Vista principal de productos (lista)."""
-    return templates.TemplateResponse("productos/read.html", {"request": request})
-
-
-@app.get("/productos/read", tags=["Pages"])
 async def productos_read_page(request: Request):
+    """Vista principal y listado de productos."""
     return templates.TemplateResponse("productos/read.html", {"request": request})
-
 
 @app.get("/productos/create", tags=["Pages"])
 async def productos_create_page(request: Request):
     return templates.TemplateResponse("productos/create.html", {"request": request})
 
-
 @app.get("/productos/update", tags=["Pages"])
 async def productos_update_page(request: Request):
     return templates.TemplateResponse("productos/update.html", {"request": request})
-
 
 @app.get("/productos/delete", tags=["Pages"])
 async def productos_delete_page(request: Request):
@@ -129,53 +113,37 @@ async def productos_delete_page(request: Request):
 # ---------- CLIENTES ----------
 
 @app.get("/clientes", tags=["Pages"])
-async def clientes_home(request: Request):
-    """Vista principal de clientes (lista)."""
-    return templates.TemplateResponse("clientes/read.html", {"request": request})
-
-
-@app.get("/clientes/read", tags=["Pages"])
 async def clientes_read_page(request: Request):
+    """Vista principal y listado de clientes."""
     return templates.TemplateResponse("clientes/read.html", {"request": request})
-
 
 @app.get("/clientes/create", tags=["Pages"])
 async def clientes_create_page(request: Request):
     return templates.TemplateResponse("clientes/create.html", {"request": request})
 
-
 @app.get("/clientes/update", tags=["Pages"])
 async def clientes_update_page(request: Request):
     return templates.TemplateResponse("clientes/update.html", {"request": request})
-
 
 @app.get("/clientes/delete", tags=["Pages"])
 async def clientes_delete_page(request: Request):
     return templates.TemplateResponse("clientes/delete.html", {"request": request})
 
 
-# ---------- VENTAS ----------
+# ---------- VENTAS (COMPRAS) ----------
 
 @app.get("/ventas", tags=["Pages"])
-async def ventas_home(request: Request):
-    """Vista principal de ventas (lista)."""
-    return templates.TemplateResponse("ventas/read.html", {"request": request})
-
-
-@app.get("/ventas/read", tags=["Pages"])
 async def ventas_read_page(request: Request):
+    """Vista principal y listado de ventas."""
     return templates.TemplateResponse("ventas/read.html", {"request": request})
-
 
 @app.get("/ventas/create", tags=["Pages"])
 async def ventas_create_page(request: Request):
     return templates.TemplateResponse("ventas/create.html", {"request": request})
 
-
 @app.get("/ventas/update", tags=["Pages"])
 async def ventas_update_page(request: Request):
     return templates.TemplateResponse("ventas/update.html", {"request": request})
-
 
 @app.get("/ventas/delete", tags=["Pages"])
 async def ventas_delete_page(request: Request):
@@ -185,25 +153,17 @@ async def ventas_delete_page(request: Request):
 # ---------- CATEGORÍAS ----------
 
 @app.get("/categorias", tags=["Pages"])
-async def categorias_home(request: Request):
-    """Vista principal de categorías (lista)."""
-    return templates.TemplateResponse("categorias/read.html", {"request": request})
-
-
-@app.get("/categorias/read", tags=["Pages"])
 async def categorias_read_page(request: Request):
+    """Vista principal y listado de categorías."""
     return templates.TemplateResponse("categorias/read.html", {"request": request})
-
 
 @app.get("/categorias/create", tags=["Pages"])
 async def categorias_create_page(request: Request):
     return templates.TemplateResponse("categorias/create.html", {"request": request})
 
-
 @app.get("/categorias/update", tags=["Pages"])
 async def categorias_update_page(request: Request):
     return templates.TemplateResponse("categorias/update.html", {"request": request})
-
 
 @app.get("/categorias/delete", tags=["Pages"])
 async def categorias_delete_page(request: Request):
@@ -222,9 +182,14 @@ async def planning_page(request: Request):
     return templates.TemplateResponse("planning.html", {"request": request})
 
 
-@app.get("/informacion-del-proyecto", tags=["Pages"])
+@app.get("/informacion_del_proyecto", tags=["Pages"])
 async def informacion_del_proyecto_page(request: Request):
     return templates.TemplateResponse("informacion_del_proyecto.html", {"request": request})
+
+
+@app.get("/graficas", tags=["Pages"])
+async def graficas_page(request: Request):
+    return templates.TemplateResponse("graficas.html", {"request": request})
 
 
 # ==========================
@@ -237,17 +202,3 @@ app.include_router(clientes_router)
 app.include_router(compras_router)
 app.include_router(categorias_router)
 app.include_router(historial_router)
-
-
-"""
-from database import engine, Base
-
-@app.on_event("startup")
-async def startup_event():
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        print("✔ Tablas creadas correctamente.")
-    except Exception as e:
-        print("⚠ Error al crear tablas:", e)
-"""

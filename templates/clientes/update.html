@@ -9,44 +9,54 @@
 <body>
     <nav class="navbar">
         <a href="/">Inicio</a>
+        
         <div class="dropdown">
             <button class="dropbtn">Categorías</button>
             <div class="dropdown-content">
-                <a href="../categorias/read.html">Ver Categorías</a>
-                <a href="../categorias/create.html">Crear Categoría</a>
-                <a href="../categorias/update.html">Actualizar Categoría</a>
-                <a href="../categorias/delete.html">Eliminar Categoría</a>
+                <a href="/categorias">Ver Categorías</a>
+                <a href="/categorias/create">Crear Categoría</a>
+                <a href="/categorias/update">Actualizar Categoría</a>
+                <a href="/categorias/delete">Eliminar Categoría</a>
             </div>
         </div>
+        
         <div class="dropdown">
             <button class="dropbtn">Productos</button>
             <div class="dropdown-content">
-                <a href="../productos/read.html">Ver Productos</a>
-                <a href="../productos/create.html">Crear Producto</a>
-                <a href="../productos/update.html">Actualizar Producto</a>
-                <a href="../productos/delete.html">Eliminar Producto</a>
+                <a href="/productos">Ver Productos</a>
+                <a href="/productos/create">Crear Producto</a>
+                <a href="/productos/update">Actualizar Producto</a>
+                <a href="/productos/delete">Eliminar Producto</a>
             </div>
         </div>
+        
         <div class="dropdown">
             <button class="dropbtn">Clientes</button>
             <div class="dropdown-content">
-                <a href="read.html">Ver Clientes</a>
-                <a href="create.html">Crear Cliente</a>
-                <a href="update.html">Actualizar Cliente</a>
-                <a href="delete.html">Eliminar Cliente</a>
+                <a href="/clientes">Ver Clientes</a>
+                <a href="/clientes/create">Crear Cliente</a>
+                <a href="/clientes/update">Actualizar Cliente</a>
+                <a href="/clientes/delete">Eliminar Cliente</a>
             </div>
         </div>
+        
         <div class="dropdown">
             <button class="dropbtn">Ventas</button>
             <div class="dropdown-content">
-                <a href="../ventas/read.html">Ver Ventas</a>
-                <a href="../ventas/create.html">Crear Venta</a>
+                <a href="/ventas">Ver Ventas</a>
+                <a href="/ventas/create">Crear Venta</a>
+                <a href="/ventas/update">Actualizar Venta</a>
+                <a href="/ventas/delete">Eliminar Venta</a>
             </div>
         </div>
-        <a href="/historial.html">Historial</a>
-        <a href="/planning.html">Planificación</a>
-        <a href="/informacion_del_proyecto.html">Información del Proyecto</a>
+        
+        <a href="/historial">Historial</a>
+        <a href="/graficas">Gráficas</a>
+        <a href="/planning">Planificación</a>
+        <a href="/informacion_del_proyecto">Información del Proyecto</a>
     </nav>
+
+    {% include 'sidebar.html' %}
 
     <div class="container">
         <h1>Actualizar Cliente</h1>
@@ -59,7 +69,8 @@
     <script>
         async function loadClientes() {
             try {
-                const response = await fetch('/clientes');
+                // Se asume la ruta de lectura de clientes es /api/clientes
+                const response = await fetch('/api/clientes');
                 const clientes = await response.json();
                 const listDiv = document.getElementById('clientes-list');
 
@@ -72,9 +83,9 @@
                 clientes.forEach(cliente => {
                     html += `<tr>
                         <td>${cliente.id}</td>
-                        <td><input type="text" value="${cliente.nombre}" id="nombre-${cliente.id}" /></td>
-                        <td><input type="text" value="${cliente.cedula}" id="cedula-${cliente.id}" /></td>
-                        <td><input type="email" value="${cliente.correo}" id="correo-${cliente.id}" /></td>
+                        <td><input type="text" value="${cliente.nombre}" id="nombre-${cliente.id}" required /></td>
+                        <td><input type="text" value="${cliente.cedula}" id="cedula-${cliente.id}" required /></td>
+                        <td><input type="email" value="${cliente.correo}" id="correo-${cliente.id}" required /></td>
                         <td><input type="tel" value="${cliente.telefono || ''}" id="telefono-${cliente.id}" /></td>
                         <td><textarea id="direccion-${cliente.id}">${cliente.direccion || ''}</textarea></td>
                         <td><button onclick="updateCliente(${cliente.id})">Actualizar</button></td>
@@ -94,12 +105,15 @@
             const correo = document.getElementById(`correo-${id}`).value;
             const telefono = document.getElementById(`telefono-${id}`).value;
             const direccion = document.getElementById(`direccion-${id}`).value;
-            const data = { nombre, cedula, correo };
-            if (telefono) data.telefono = telefono;
-            if (direccion) data.direccion = direccion;
+            
+            // Creamos el objeto de datos, asegurando que los campos requeridos (nombre, cedula, correo) siempre estén presentes
+            const data = { nombre, cedula, correo }; 
+            if (telefono) data.telefono = telefono; // Opcional
+            if (direccion) data.direccion = direccion; // Opcional
 
             try {
-                const response = await fetch(`/clientes/${id}`, {
+                // Se asume que el endpoint de actualización es PUT /api/clientes/{id}
+                const response = await fetch(`/api/clientes/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -107,7 +121,7 @@
 
                 if (response.ok) {
                     alert('Cliente actualizado exitosamente');
-                    loadClientes();
+                    loadClientes(); // Recargar la lista para mostrar los cambios
                 } else {
                     const error = await response.json();
                     alert('Error: ' + error.detail);
@@ -117,7 +131,39 @@
             }
         }
 
-        window.onload = loadClientes;
+        window.onload = () => loadClientes();
+
+        // Sidebar y submenu toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const body = document.body;
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            body.classList.toggle('sidebar-open');
+        }
+
+        function toggleSubmenu(element) {
+            element.classList.toggle('active');
+            const submenu = element.nextElementSibling;
+            if (submenu.style.maxHeight) {
+                submenu.style.maxHeight = null;
+            } else {
+                submenu.style.maxHeight = submenu.scrollHeight + "px";
+            }
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.querySelector('.hamburger-btn');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (!sidebar.contains(event.target) && !hamburger.contains(event.target) && sidebar.classList.contains('open')) {
+                toggleSidebar();
+            }
+        });
     </script>
 </body>
 </html>

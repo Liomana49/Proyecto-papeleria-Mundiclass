@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status, Response, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Response, UploadFile, File, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
@@ -14,14 +14,20 @@ router = APIRouter(prefix="/api/productos", tags=["Productos"])
 @router.get("/", response_model=List[schemas.ProductoRead])
 async def listar_productos(
     nombre: Optional[str] = None,
+    stock_min: Optional[int] = None,
     categoria_id: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.listar_productos(db, nombre=nombre, min_stock=None)  # adapt as needed
+    return await crud.listar_productos(db, nombre=nombre, stock_min=stock_min, categoria_id=categoria_id)
 
 @router.post("/", response_model=schemas.ProductoRead, status_code=status.HTTP_201_CREATED)
 async def crear_producto(
-    payload: schemas.ProductoCreate,
+    nombre: str = Form(...),
+    descripcion: Optional[str] = Form(None),
+    cantidad: int = Form(...),
+    valor_unitario: float = Form(...),
+    valor_mayorista: Optional[float] = Form(None),
+    categoria_id: Optional[int] = Form(None),
     imagen: Optional[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
 ):
@@ -36,16 +42,27 @@ async def crear_producto(
         # 👇 usamos folder="productos"
         imagen_url = await upload_image_to_supabase(imagen, folder="productos")
 
-    # Si hay imagen_url, la agregamos al payload
-    if imagen_url:
-        payload.imagen_url = imagen_url
+    payload = schemas.ProductoCreate(
+        nombre=nombre,
+        descripcion=descripcion,
+        cantidad=cantidad,
+        valor_unitario=valor_unitario,
+        valor_mayorista=valor_mayorista,
+        categoria_id=categoria_id,
+        imagen_url=imagen_url,
+    )
 
     return await crud.crear_producto(db, payload)
 
 @router.put("/{producto_id}", response_model=schemas.ProductoRead)
 async def actualizar_producto(
     producto_id: int,
-    payload: schemas.ProductoUpdate,
+    nombre: Optional[str] = Form(None),
+    descripcion: Optional[str] = Form(None),
+    cantidad: Optional[int] = Form(None),
+    valor_unitario: Optional[float] = Form(None),
+    valor_mayorista: Optional[float] = Form(None),
+    categoria_id: Optional[int] = Form(None),
     imagen: Optional[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
 ):
@@ -59,9 +76,15 @@ async def actualizar_producto(
         # 👇 usamos folder="productos"
         imagen_url = await upload_image_to_supabase(imagen, folder="productos")
 
-    # Si hay imagen_url, la agregamos al payload
-    if imagen_url:
-        payload.imagen_url = imagen_url
+    payload = schemas.ProductoUpdate(
+        nombre=nombre,
+        descripcion=descripcion,
+        cantidad=cantidad,
+        valor_unitario=valor_unitario,
+        valor_mayorista=valor_mayorista,
+        categoria_id=categoria_id,
+        imagen_url=imagen_url,
+    )
 
     return await crud.actualizar_producto(db, producto_id, payload)
 

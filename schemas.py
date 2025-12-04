@@ -66,7 +66,6 @@ class UsuarioRead(UsuarioBase):
     id: int
     creado_en: datetime
     actualizado_en: datetime
-    multimedia: Optional[List[MultimediaRead]] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -79,6 +78,8 @@ class ClienteBase(BaseModel):
     cedula: str
     tipo_cliente: Optional[str] = None    # mayorista / minorista
     cliente_frecuente: bool = False
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
     usuario_id: Optional[int] = None
 
 
@@ -91,14 +92,15 @@ class ClienteUpdate(BaseModel):
     cedula: Optional[str] = None
     tipo_cliente: Optional[str] = None
     cliente_frecuente: Optional[bool] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
     usuario_id: Optional[int] = None
 
 
 class ClienteRead(ClienteBase):
     id: int
     creado_en: datetime
-    multimedia: Optional[List[MultimediaRead]] = []
-
+    
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -191,7 +193,8 @@ class CompraUpdate(BaseModel):
 class CompraRead(CompraBase):
     id: int
     fecha: datetime
-    multimedia: Optional[List[MultimediaRead]] = []
+    cliente: Optional["ClienteRead"] = None
+    producto: Optional["ProductoRead"] = None
 
     model_config = ConfigDict(from_attributes=True)
 

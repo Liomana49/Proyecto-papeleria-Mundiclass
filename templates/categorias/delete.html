@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eliminar Categoría - Inventario y Ventas API</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        .warning-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .warning-box strong {
+            color: #6a5300;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -15,13 +28,16 @@
                 <a href="/categorias">Ver Categorías</a>
                 <a href="/categorias/create">Crear Categoría</a>
                 <a href="/categorias/update">Actualizar Categoría</a>
+                <a href="/categorias/delete">Eliminar Categoría</a>
             </div>
         </div>
         <div class="dropdown">
             <button class="dropbtn">Productos</button>
             <div class="dropdown-content">
                 <a href="/productos">Ver Productos</a>
+                <a href="/productos/create">Crear Producto</a>
                 <a href="/productos/update">Actualizar Producto</a>
+                <a href="/productos/delete">Eliminar Producto</a>
             </div>
         </div>
         <div class="dropdown">
@@ -30,23 +46,33 @@
                 <a href="/clientes">Ver Clientes</a>
                 <a href="/clientes/create">Crear Cliente</a>
                 <a href="/clientes/update">Actualizar Cliente</a>
+                <a href="/clientes/delete">Eliminar Cliente</a>
             </div>
         </div>
         <div class="dropdown">
             <button class="dropbtn">Ventas</button>
             <div class="dropdown-content">
                 <a href="/ventas">Ver Ventas</a>
+                <a href="/ventas/create">Crear Venta</a>
                 <a href="/ventas/update">Actualizar Venta</a>
                 <a href="/ventas/delete">Eliminar Venta</a>
             </div>
         </div>
         <a href="/historial">Historial</a>
+        <a href="/graficas">Gráficas</a>
         <a href="/planning">Planificación</a>
-        <a href="/informacion-del-proyecto">Información del Proyecto</a>
+        <a href="/informacion_del_proyecto">Información del Proyecto</a>
     </nav>
+
+    {% include 'sidebar.html' %}
 
     <div class="container">
         <h1>Eliminar Categoría</h1>
+
+        <div class="warning-box">
+            <strong>Advertencia de Eliminación en Cascada:</strong>
+            <p>Al eliminar una categoría, <strong>todos los productos que pertenecen a esta categoría también serán eliminados permanentemente</strong> (incluyendo su registro en el Historial de Eliminados). Por favor, asegúrate de que es la acción deseada.</p>
+        </div>
 
         <div class="form-section">
             <form id="delete-categoria-form">
@@ -68,12 +94,12 @@
             const messageDiv = document.getElementById('message');
 
             try {
-                const response = await fetch(`/categorias/${categoriaId}`, {
+                const response = await fetch(`/api/categorias/${categoriaId}`, {
                     method: 'DELETE'
                 });
 
                 if (response.ok) {
-                    messageDiv.innerHTML = '<p style="color: green;">Categoría eliminada exitosamente</p>';
+                    messageDiv.innerHTML = '<p style="color: green;">Categoría eliminada exitosamente (los productos asociados fueron eliminados en cascada).</p>';
                     this.reset();
                 } else {
                     const error = await response.json();
@@ -81,6 +107,37 @@
                 }
             } catch (error) {
                 messageDiv.innerHTML = '<p style="color: red;">Error de red: ' + error.message + '</p>';
+            }
+        });
+
+        // Sidebar y submenu toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const body = document.body;
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            body.classList.toggle('sidebar-open');
+        }
+
+        function toggleSubmenu(element) {
+            element.classList.toggle('active');
+            const submenu = element.nextElementSibling;
+            if (submenu.style.maxHeight) {
+                submenu.style.maxHeight = null;
+            } else {
+                submenu.style.maxHeight = submenu.scrollHeight + "px";
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.querySelector('.hamburger-btn');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (!sidebar.contains(event.target) && !hamburger.contains(event.target) && sidebar.classList.contains('open')) {
+                toggleSidebar();
             }
         });
     </script>

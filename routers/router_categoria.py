@@ -9,6 +9,7 @@ from fastapi import (
     Response,
     UploadFile,
     File,
+    Form,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,8 +27,7 @@ async def listar_categorias(
     codigo: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    # Si tu crud.listar_categorias acepta filtros, pásalos; si no, solo db
-    return await crud.listar_categorias(db)
+    return await crud.listar_categorias(db, nombre=nombre, codigo=codigo)
 
 
 @router.post(
@@ -36,7 +36,8 @@ async def listar_categorias(
     status_code=status.HTTP_201_CREATED,
 )
 async def crear_categoria(
-    payload: schemas.CategoriaCreate,
+    nombre: str = Form(...),
+    codigo: Optional[str] = Form(None),
     imagen: Optional[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
 ):
@@ -51,9 +52,12 @@ async def crear_categoria(
         # 👇 usamos folder="categorias"
         imagen_url = await upload_image_to_supabase(imagen, folder="categorias")
 
-    # Si hay imagen_url, la agregamos al payload
-    if imagen_url:
-        payload.imagen_url = imagen_url
+    # Crear el payload
+    payload = schemas.CategoriaCreate(
+        nombre=nombre,
+        codigo=codigo,
+        imagen_url=imagen_url
+    )
 
     return await crud.crear_categoria(db, payload)
 
@@ -61,7 +65,8 @@ async def crear_categoria(
 @router.put("/{categoria_id}", response_model=schemas.CategoriaRead)
 async def actualizar_categoria(
     categoria_id: int,
-    payload: schemas.CategoriaUpdate,
+    nombre: Optional[str] = Form(None),
+    codigo: Optional[str] = Form(None),
     imagen: Optional[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
 ):
@@ -75,9 +80,11 @@ async def actualizar_categoria(
         # 👇 nuevamente folder="categorias"
         imagen_url = await upload_image_to_supabase(imagen, folder="categorias")
 
-    # Si hay imagen_url, la agregamos al payload
-    if imagen_url:
-        payload.imagen_url = imagen_url
+    payload = schemas.CategoriaUpdate(
+        nombre=nombre,
+        codigo=codigo,
+        imagen_url=imagen_url,
+    )
 
     return await crud.actualizar_categoria(db, categoria_id, payload)
 

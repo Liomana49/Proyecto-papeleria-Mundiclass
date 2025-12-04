@@ -12,12 +12,15 @@ router = APIRouter(prefix="/api/usuarios", tags=["Usuarios"])
 
 @router.get("/", response_model=List[schemas.UsuarioRead])
 async def listar_usuarios(
-    rol: Optional[str] = None,
-    cedula: Optional[str] = None,
+    nombre: Optional[str] = None,
     correo: Optional[str] = None,
+    cedula: Optional[str] = None,
+    rol: Optional[str] = None,
+    tipo: Optional[str] = None,
+    cliente_frecuente: Optional[bool] = None,
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.listar_usuarios(db)  # Filtering can be added to crud if necessary
+    return await crud.listar_usuarios(db, nombre=nombre, correo=correo, cedula=cedula, rol=rol, tipo=tipo, cliente_frecuente=cliente_frecuente)
 
 @router.get("/{usuario_id}", response_model=schemas.UsuarioRead)
 async def obtener_usuario(usuario_id: int, db: AsyncSession = Depends(get_db)):

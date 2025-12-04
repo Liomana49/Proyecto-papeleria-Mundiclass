@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráficas - Inventario y Ventas</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        .graficas-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .grafica-box {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #2c3e50;
+        }
+
+        .grafica-box h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.green {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .stat-card.orange {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-card.blue {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card h4 {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: normal;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0 0 0;
+        }
+
+        .filters {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .filter-group button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .filter-group button:hover {
+            background-color: #2980b9;
+        }
+
+        .container-graficas {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/">Inicio</a>
+        <div class="dropdown">
+            <button class="dropbtn">Categorías</button>
+            <div class="dropdown-content">
+                <a href="/categorias">Ver Categorías</a>
+                <a href="/categorias/create">Crear Categoría</a>
+                <a href="/categorias/update">Actualizar Categoría</a>
+                <a href="/categorias/delete">Eliminar Categoría</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Productos</button>
+            <div class="dropdown-content">
+                <a href="/productos">Ver Productos</a>
+                <a href="/productos/create">Crear Producto</a>
+                <a href="/productos/update">Actualizar Producto</a>
+                <a href="/productos/delete">Eliminar Producto</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Clientes</button>
+            <div class="dropdown-content">
+                <a href="/clientes">Ver Clientes</a>
+                <a href="/clientes/create">Crear Cliente</a>
+                <a href="/clientes/update">Actualizar Cliente</a>
+                <a href="/clientes/delete">Eliminar Cliente</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Ventas</button>
+            <div class="dropdown-content">
+                <a href="/ventas">Ver Ventas</a>
+                <a href="/ventas/create">Crear Venta</a>
+                <a href="/ventas/update">Actualizar Venta</a>
+                <a href="/ventas/delete">Eliminar Venta</a>
+            </div>
+        </div>
+        <a href="/historial">Historial</a>
+        <a href="/planning">Planificación</a>
+        <a href="/graficas">Gráficas</a>
+        <a href="/informacion_del_proyecto">Información del Proyecto</a>
+    </nav>
+
+    {% include 'sidebar.html' %}
+
+    <div class="container-graficas">
+        <h1>📊 Análisis y Gráficas</h1>
+
+        <!-- Estadísticas Generales -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>Total de Categorías</h4>
+                <div class="value" id="total-categorias">0</div>
+            </div>
+            <div class="stat-card green">
+                <h4>Total de Productos</h4>
+                <div class="value" id="total-productos">0</div>
+            </div>
+            <div class="stat-card orange">
+                <h4>Total de Clientes</h4>
+                <div class="value" id="total-clientes">0</div>
+            </div>
+            <div class="stat-card blue">
+                <h4>Total de Compras</h4>
+                <div class="value" id="total-compras">0</div>
+            </div>
+        </div>
+
+        <!-- Gráficas -->
+        <div class="graficas-container">
+            <!-- Gráfica: Productos por Categoría -->
+            <div class="grafica-box">
+                <h3>📦 Productos por Categoría</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartProductosPorCategoria"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfica: Stock por Categoría -->
+            <div class="grafica-box">
+                <h3>📈 Stock Total por Categoría</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartStockPorCategoria"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfica: Top 10 Productos por Stock -->
+            <div class="grafica-box">
+                <h3>🏆 Top 10 Productos por Stock</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartTopProductos"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfica: Compras por Cliente (Top 10) -->
+            <div class="grafica-box">
+                <h3>👥 Top 10 Clientes por Compras</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartClientesTop"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfica: Ventas por Mes (Full Width) -->
+            <div class="grafica-box full-width">
+                <h3>💰 Total de Ventas por Mes</h3>
+                <div class="chart-wrapper" style="height: 300px;">
+                    <canvas id="chartVentasPorMes"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfica: Distribucion de Tipos de Cliente -->
+            <div class="grafica-box">
+                <h3>🎯 Distribución de Clientes por Tipo</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartTiposCliente"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfica: Clientes Frecuentes vs No Frecuentes -->
+            <div class="grafica-box">
+                <h3>⭐ Clientes Frecuentes</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartClientesFrecuentes"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfica: Valor Total de Inventario por Categoría -->
+            <div class="grafica-box full-width">
+                <h3>💎 Valor Total del Inventario por Categoría</h3>
+                <div class="chart-wrapper" style="height: 300px;">
+                    <canvas id="chartValorInventario"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DATOS EMBEBIDOS DEL ARCHIVO datos.sql
+        const categorias = [
+            { id: 1, nombre: 'Escritura', codigo: 'ESC001' },
+            { id: 2, nombre: 'Cuadernos', codigo: 'CUA001' },
+            { id: 3, nombre: 'Papel', codigo: 'PAP001' },
+            { id: 4, nombre: 'Oficina', codigo: 'OFI001' },
+            { id: 5, nombre: 'Escolar', codigo: 'ESC002' },
+            { id: 6, nombre: 'Arte', codigo: 'ART001' }
+        ];
+
+        const clientes = [
+            { id: 1, nombre: 'Carlos Rodriguez', tipo_cliente: 'minorista', cliente_frecuente: false },
+            { id: 2, nombre: 'Maria Lopez', tipo_cliente: 'mayorista', cliente_frecuente: true },
+            { id: 3, nombre: 'Juan Martinez', tipo_cliente: 'minorista', cliente_frecuente: false },
+            { id: 4, nombre: 'Ana Garcia', tipo_cliente: 'minorista', cliente_frecuente: false },
+            { id: 5, nombre: 'Pedro Hernandez', tipo_cliente: 'mayorista', cliente_frecuente: false },
+            { id: 6, nombre: 'Laura Sanchez', tipo_cliente: 'minorista', cliente_frecuente: true },
+            { id: 7, nombre: 'Diego Ramirez', tipo_cliente: 'minorista', cliente_frecuente: false },
+            { id: 8, nombre: 'Sofia Torres', tipo_cliente: 'mayorista', cliente_frecuente: false },
+            { id: 9, nombre: 'Andres Gomez', tipo_cliente: 'minorista', cliente_frecuente: false },
+            { id: 10, nombre: 'Camila Diaz', tipo_cliente: 'minorista', cliente_frecuente: true },
+            { id: 11, nombre: 'Felipe Moreno', tipo_cliente: 'mayorista', cliente_frecuente: false },
+            { id: 12, nombre: 'Valentina Vargas', tipo_cliente: 'minorista', cliente_frecuente: false },
+            { id: 13, nombre: 'Sebastian Castro', tipo_cliente: 'minorista', cliente_frecuente: false },
+            { id: 14, nombre: 'Isabella Ortiz', tipo_cliente: 'mayorista', cliente_frecuente: true },
+            { id: 15, nombre: 'Nicolas Rojas', tipo_cliente: 'minorista', cliente_frecuente: false }
+        ];
+
+        const productos = [
+            { id: 1, nombre: 'Lapiz Mirado #2', cantidad: 500, valor_unitario: 800.00, categoria_id: 1 },
+            { id: 2, nombre: 'Boligrafo Kilometric azul', cantidad: 400, valor_unitario: 1200.00, categoria_id: 1 },
+            { id: 3, nombre: 'Boligrafo Kilometric negro', cantidad: 350, valor_unitario: 1200.00, categoria_id: 1 },
+            { id: 4, nombre: 'Boligrafo Kilometric rojo', cantidad: 300, valor_unitario: 1200.00, categoria_id: 1 },
+            { id: 5, nombre: 'Marcador permanente Sharpie', cantidad: 150, valor_unitario: 3500.00, categoria_id: 1 },
+            { id: 6, nombre: 'Resaltador amarillo', cantidad: 200, valor_unitario: 2800.00, categoria_id: 1 },
+            { id: 7, nombre: 'Portaminas 0.5mm', cantidad: 120, valor_unitario: 4500.00, categoria_id: 1 },
+            { id: 8, nombre: 'Cuaderno cuadriculado 100h', cantidad: 180, valor_unitario: 5500.00, categoria_id: 2 },
+            { id: 9, nombre: 'Cuaderno rayado 100h', cantidad: 200, valor_unitario: 5500.00, categoria_id: 2 },
+            { id: 10, nombre: 'Cuaderno cuadriculado 50h', cantidad: 250, valor_unitario: 3200.00, categoria_id: 2 },
+            { id: 11, nombre: 'Libreta pequeña', cantidad: 150, valor_unitario: 2500.00, categoria_id: 2 },
+            { id: 12, nombre: 'Agenda 2024', cantidad: 50, valor_unitario: 25000.00, categoria_id: 2 },
+            { id: 13, nombre: 'Resma papel carta', cantidad: 100, valor_unitario: 15000.00, categoria_id: 3 },
+            { id: 14, nombre: 'Resma papel oficio', cantidad: 80, valor_unitario: 17000.00, categoria_id: 3 },
+            { id: 15, nombre: 'Cartulina pliego', cantidad: 300, valor_unitario: 1500.00, categoria_id: 3 },
+            { id: 16, nombre: 'Papel silueta', cantidad: 400, valor_unitario: 800.00, categoria_id: 3 },
+            { id: 17, nombre: 'Carpeta legajadora', cantidad: 150, valor_unitario: 4500.00, categoria_id: 4 },
+            { id: 18, nombre: 'Folder carta', cantidad: 500, valor_unitario: 600.00, categoria_id: 4 },
+            { id: 19, nombre: 'Caja clips', cantidad: 200, valor_unitario: 2000.00, categoria_id: 4 },
+            { id: 20, nombre: 'Grapadora', cantidad: 60, valor_unitario: 12000.00, categoria_id: 4 },
+            { id: 21, nombre: 'Caja grapas', cantidad: 180, valor_unitario: 3500.00, categoria_id: 4 },
+            { id: 22, nombre: 'Tijeras escolares', cantidad: 150, valor_unitario: 3000.00, categoria_id: 5 },
+            { id: 23, nombre: 'Sacapuntas metalico', cantidad: 250, valor_unitario: 1500.00, categoria_id: 5 },
+            { id: 24, nombre: 'Borrador nata', cantidad: 400, valor_unitario: 1000.00, categoria_id: 5 },
+            { id: 25, nombre: 'Caja colores x12', cantidad: 100, valor_unitario: 8500.00, categoria_id: 5 },
+            { id: 26, nombre: 'Caja colores x24', cantidad: 80, valor_unitario: 15000.00, categoria_id: 5 },
+            { id: 27, nombre: 'Regla 30cm', cantidad: 200, valor_unitario: 1200.00, categoria_id: 5 },
+            { id: 28, nombre: 'Compas escolar', cantidad: 90, valor_unitario: 5500.00, categoria_id: 5 },
+            { id: 29, nombre: 'Temperas x6', cantidad: 100, valor_unitario: 7500.00, categoria_id: 6 },
+            { id: 30, nombre: 'Acuarelas x12', cantidad: 70, valor_unitario: 9500.00, categoria_id: 6 },
+            { id: 31, nombre: 'Pinceles set x5', cantidad: 60, valor_unitario: 8000.00, categoria_id: 6 },
+            { id: 32, nombre: 'Block cartulina', cantidad: 120, valor_unitario: 6500.00, categoria_id: 6 }
+        ];
+
+        const compras = [
+            { id: 1, cliente_id: 1, producto_id: 1, cantidad: 5, precio_unitario_aplicado: 800.00, total: 4000.00 },
+            { id: 2, cliente_id: 1, producto_id: 8, cantidad: 2, precio_unitario_aplicado: 5500.00, total: 11000.00 },
+            { id: 3, cliente_id: 2, producto_id: 2, cantidad: 3, precio_unitario_aplicado: 1200.00, total: 3600.00 },
+            { id: 4, cliente_id: 2, producto_id: 11, cantidad: 1, precio_unitario_aplicado: 2500.00, total: 2500.00 },
+            { id: 5, cliente_id: 3, producto_id: 13, cantidad: 1, precio_unitario_aplicado: 15000.00, total: 15000.00 },
+            { id: 6, cliente_id: 3, producto_id: 19, cantidad: 3, precio_unitario_aplicado: 2000.00, total: 6000.00 },
+            { id: 7, cliente_id: 4, producto_id: 5, cantidad: 1, precio_unitario_aplicado: 3500.00, total: 3500.00 },
+            { id: 8, cliente_id: 4, producto_id: 6, cantidad: 1, precio_unitario_aplicado: 2800.00, total: 2800.00 },
+            { id: 9, cliente_id: 5, producto_id: 14, cantidad: 1, precio_unitario_aplicado: 17000.00, total: 17000.00 },
+            { id: 10, cliente_id: 5, producto_id: 25, cantidad: 1, precio_unitario_aplicado: 8500.00, total: 8500.00 },
+            { id: 11, cliente_id: 6, producto_id: 9, cantidad: 2, precio_unitario_aplicado: 5500.00, total: 11000.00 },
+            { id: 12, cliente_id: 6, producto_id: 18, cantidad: 2, precio_unitario_aplicado: 600.00, total: 1200.00 },
+            { id: 13, cliente_id: 7, producto_id: 13, cantidad: 2, precio_unitario_aplicado: 15000.00, total: 30000.00 },
+            { id: 14, cliente_id: 7, producto_id: 1, cantidad: 10, precio_unitario_aplicado: 800.00, total: 8000.00 },
+            { id: 15, cliente_id: 8, producto_id: 14, cantidad: 1, precio_unitario_aplicado: 17000.00, total: 17000.00 },
+            { id: 16, cliente_id: 8, producto_id: 2, cantidad: 3, precio_unitario_aplicado: 1200.00, total: 3600.00 },
+            { id: 17, cliente_id: 8, producto_id: 3, cantidad: 2, precio_unitario_aplicado: 1200.00, total: 2400.00 },
+            { id: 18, cliente_id: 9, producto_id: 12, cantidad: 1, precio_unitario_aplicado: 25000.00, total: 25000.00 },
+            { id: 19, cliente_id: 9, producto_id: 17, cantidad: 1, precio_unitario_aplicado: 4500.00, total: 4500.00 },
+            { id: 20, cliente_id: 10, producto_id: 10, cantidad: 2, precio_unitario_aplicado: 3200.00, total: 6400.00 },
+            { id: 21, cliente_id: 10, producto_id: 6, cantidad: 1, precio_unitario_aplicado: 2800.00, total: 2800.00 },
+            { id: 22, cliente_id: 11, producto_id: 7, cantidad: 1, precio_unitario_aplicado: 4500.00, total: 4500.00 },
+            { id: 23, cliente_id: 11, producto_id: 11, cantidad: 2, precio_unitario_aplicado: 2500.00, total: 5000.00 },
+            { id: 24, cliente_id: 12, producto_id: 15, cantidad: 3, precio_unitario_aplicado: 1500.00, total: 4500.00 },
+            { id: 25, cliente_id: 12, producto_id: 16, cantidad: 4, precio_unitario_aplicado: 800.00, total: 3200.00 },
+            { id: 26, cliente_id: 13, producto_id: 20, cantidad: 1, precio_unitario_aplicado: 12000.00, total: 12000.00 },
+            { id: 27, cliente_id: 13, producto_id: 21, cantidad: 2, precio_unitario_aplicado: 3500.00, total: 7000.00 },
+            { id: 28, cliente_id: 14, producto_id: 24, cantidad: 5, precio_unitario_aplicado: 1000.00, total: 5000.00 },
+            { id: 29, cliente_id: 14, producto_id: 26, cantidad: 2, precio_unitario_aplicado: 15000.00, total: 30000.00 },
+            { id: 30, cliente_id: 15, producto_id: 27, cantidad: 1, precio_unitario_aplicado: 5500.00, total: 5500.00 },
+            { id: 31, cliente_id: 1, producto_id: 28, cantidad: 3, precio_unitario_aplicado: 7500.00, total: 22500.00 },
+            { id: 32, cliente_id: 2, producto_id: 29, cantidad: 2, precio_unitario_aplicado: 9500.00, total: 19000.00 },
+            { id: 33, cliente_id: 3, producto_id: 30, cantidad: 1, precio_unitario_aplicado: 8000.00, total: 8000.00 },
+            { id: 34, cliente_id: 4, producto_id: 31, cantidad: 2, precio_unitario_aplicado: 6500.00, total: 13000.00 },
+            { id: 35, cliente_id: 5, producto_id: 4, cantidad: 4, precio_unitario_aplicado: 1200.00, total: 4800.00 },
+            { id: 36, cliente_id: 6, producto_id: 5, cantidad: 2, precio_unitario_aplicado: 3500.00, total: 7000.00 },
+            { id: 37, cliente_id: 7, producto_id: 22, cantidad: 3, precio_unitario_aplicado: 3000.00, total: 9000.00 },
+            { id: 38, cliente_id: 8, producto_id: 23, cantidad: 1, precio_unitario_aplicado: 1500.00, total: 1500.00 },
+            { id: 39, cliente_id: 9, producto_id: 1, cantidad: 6, precio_unitario_aplicado: 800.00, total: 4800.00 },
+            { id: 40, cliente_id: 10, producto_id: 8, cantidad: 1, precio_unitario_aplicado: 5500.00, total: 5500.00 },
+            { id: 41, cliente_id: 11, producto_id: 9, cantidad: 2, precio_unitario_aplicado: 5500.00, total: 11000.00 },
+            { id: 42, cliente_id: 12, producto_id: 10, cantidad: 1, precio_unitario_aplicado: 3200.00, total: 3200.00 },
+            { id: 43, cliente_id: 13, producto_id: 12, cantidad: 1, precio_unitario_aplicado: 25000.00, total: 25000.00 },
+            { id: 44, cliente_id: 14, producto_id: 13, cantidad: 1, precio_unitario_aplicado: 15000.00, total: 15000.00 },
+            { id: 45, cliente_id: 15, producto_id: 14, cantidad: 2, precio_unitario_aplicado: 17000.00, total: 34000.00 },
+            { id: 46, cliente_id: 1, producto_id: 24, cantidad: 4, precio_unitario_aplicado: 1000.00, total: 4000.00 },
+            { id: 47, cliente_id: 2, producto_id: 25, cantidad: 1, precio_unitario_aplicado: 8500.00, total: 8500.00 },
+            { id: 48, cliente_id: 3, producto_id: 26, cantidad: 3, precio_unitario_aplicado: 15000.00, total: 45000.00 },
+            { id: 49, cliente_id: 4, producto_id: 27, cantidad: 2, precio_unitario_aplicado: 5500.00, total: 11000.00 },
+            { id: 50, cliente_id: 5, producto_id: 28, cantidad: 1, precio_unitario_aplicado: 7500.00, total: 7500.00 }
+        ];
+
+        function inicializarGraficas() {
+            // Actualizar estadísticas
+            document.getElementById('total-categorias').textContent = categorias.length;
+            document.getElementById('total-productos').textContent = productos.length;
+            document.getElementById('total-clientes').textContent = clientes.length;
+            document.getElementById('total-compras').textContent = compras.length;
+
+            // Generar gráficas
+            chartProductosPorCategoria();
+            chartStockPorCategoria();
+            chartTopProductos();
+            chartClientesTop();
+            chartVentasPorMes();
+            chartTiposCliente();
+            chartClientesFrecuentes();
+            chartValorInventario();
+        }
+
+        // 1. Productos por Categoría
+        function chartProductosPorCategoria() {
+            const ctx = document.getElementById('chartProductosPorCategoria').getContext('2d');
+            const data = categorias.map(cat => ({
+                nombre: cat.nombre,
+                productos: productos.filter(p => p.categoria_id === cat.id).length
+            }));
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.nombre),
+                    datasets: [{
+                        data: data.map(d => d.productos),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // 2. Stock por Categoría
+        function chartStockPorCategoria() {
+            const ctx = document.getElementById('chartStockPorCategoria').getContext('2d');
+            const data = categorias.map(cat => ({
+                nombre: cat.nombre,
+                stock: productos
+                    .filter(p => p.categoria_id === cat.id)
+                    .reduce((sum, p) => sum + (p.cantidad || 0), 0)
+            }));
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.nombre),
+                    datasets: [{
+                        label: 'Stock Total',
+                        data: data.map(d => d.stock),
+                        backgroundColor: '#36A2EB'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // 3. Top 10 Productos por Stock
+        function chartTopProductos() {
+            const ctx = document.getElementById('chartTopProductos').getContext('2d');
+            const data = [...productos]
+                .sort((a, b) => (b.cantidad || 0) - (a.cantidad || 0))
+                .slice(0, 10);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(p => p.nombre.substring(0, 15)),
+                    datasets: [{
+                        label: 'Stock',
+                        data: data.map(p => p.cantidad || 0),
+                        backgroundColor: '#4BC0C0'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // 4. Top 10 Clientes por Compras
+        function chartClientesTop() {
+            const ctx = document.getElementById('chartClientesTop').getContext('2d');
+            const comprasPorCliente = {};
+            compras.forEach(compra => {
+                comprasPorCliente[compra.cliente_id] = (comprasPorCliente[compra.cliente_id] || 0) + 1;
+            });
+
+            const topClientes = Object.entries(comprasPorCliente)
+                .map(([clienteId, count]) => ({
+                    nombre: clientes.find(c => c.id == clienteId)?.nombre || 'Desconocido',
+                    compras: count
+                }))
+                .sort((a, b) => b.compras - a.compras)
+                .slice(0, 10);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: topClientes.map(c => c.nombre.substring(0, 12)),
+                    datasets: [{
+                        label: 'Número de Compras',
+                        data: topClientes.map(c => c.compras),
+                        backgroundColor: '#FF9F40'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // 5. Ventas por Mes
+        function chartVentasPorMes() {
+            const ctx = document.getElementById('chartVentasPorMes').getContext('2d');
+            const ventasPorMes = {};
+            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            
+            // Distribuir compras en meses para simulación
+            compras.forEach((compra, idx) => {
+                const mesIdx = idx % 12;
+                ventasPorMes[meses[mesIdx]] = (ventasPorMes[meses[mesIdx]] || 0) + compra.total;
+            });
+
+            const labels = meses.slice(0, Math.min(12, Object.keys(ventasPorMes).length));
+            const data = labels.map(m => ventasPorMes[m] || 0);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Ventas ($)',
+                        data: data,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#667eea'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // 6. Tipos de Cliente
+        function chartTiposCliente() {
+            const ctx = document.getElementById('chartTiposCliente').getContext('2d');
+            const tiposCliente = {};
+            clientes.forEach(cliente => {
+                const tipo = cliente.tipo_cliente || 'No especificado';
+                tiposCliente[tipo] = (tiposCliente[tipo] || 0) + 1;
+            });
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(tiposCliente),
+                    datasets: [{
+                        data: Object.values(tiposCliente),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        // 7. Clientes Frecuentes
+        function chartClientesFrecuentes() {
+            const ctx = document.getElementById('chartClientesFrecuentes').getContext('2d');
+            const frecuentes = clientes.filter(c => c.cliente_frecuente).length;
+            const noFrecuentes = clientes.length - frecuentes;
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Frecuentes', 'No Frecuentes'],
+                    datasets: [{
+                        data: [frecuentes, noFrecuentes],
+                        backgroundColor: ['#11998e', '#ecf0f1']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        // 8. Valor Total del Inventario
+        function chartValorInventario() {
+            const ctx = document.getElementById('chartValorInventario').getContext('2d');
+            const valorPorCategoria = categorias.map(cat => ({
+                nombre: cat.nombre,
+                valor: productos
+                    .filter(p => p.categoria_id === cat.id)
+                    .reduce((sum, p) => sum + ((p.cantidad || 0) * (p.valor_unitario || 0)), 0)
+            }));
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: valorPorCategoria.map(v => v.nombre),
+                    datasets: [{
+                        label: 'Valor ($)',
+                        data: valorPorCategoria.map(v => v.valor),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // Sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const body = document.body;
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            body.classList.toggle('sidebar-open');
+        }
+
+        function toggleSubmenu(element) {
+            element.classList.toggle('active');
+            const submenu = element.nextElementSibling;
+            if (submenu.style.maxHeight) {
+                submenu.style.maxHeight = null;
+            } else {
+                submenu.style.maxHeight = submenu.scrollHeight + "px";
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.querySelector('.hamburger-btn');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (!sidebar.contains(event.target) && !hamburger.contains(event.target) && sidebar.classList.contains('open')) {
+                toggleSidebar();
+            }
+        });
+
+        // Inicializar al cargar
+        window.onload = () => inicializarGraficas();
+    </script>
+</body>
+</html>

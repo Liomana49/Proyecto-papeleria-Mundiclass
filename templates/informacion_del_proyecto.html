@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Información del Proyecto - Inventario y Ventas API</title>
@@ -10,41 +9,54 @@
 <body>
     <nav class="navbar">
         <a href="/">Inicio</a>
+        
         <div class="dropdown">
             <button class="dropbtn">Categorías</button>
             <div class="dropdown-content">
                 <a href="/categorias">Ver Categorías</a>
                 <a href="/categorias/create">Crear Categoría</a>
                 <a href="/categorias/update">Actualizar Categoría</a>
+                <a href="/categorias/delete">Eliminar Categoría</a>
             </div>
         </div>
+        
         <div class="dropdown">
             <button class="dropbtn">Productos</button>
             <div class="dropdown-content">
                 <a href="/productos">Ver Productos</a>
+                <a href="/productos/create">Crear Producto</a>
                 <a href="/productos/update">Actualizar Producto</a>
+                <a href="/productos/delete">Eliminar Producto</a>
             </div>
         </div>
+        
         <div class="dropdown">
             <button class="dropbtn">Clientes</button>
             <div class="dropdown-content">
                 <a href="/clientes">Ver Clientes</a>
                 <a href="/clientes/create">Crear Cliente</a>
                 <a href="/clientes/update">Actualizar Cliente</a>
+                <a href="/clientes/delete">Eliminar Cliente</a>
             </div>
         </div>
+        
         <div class="dropdown">
             <button class="dropbtn">Ventas</button>
             <div class="dropdown-content">
                 <a href="/ventas">Ver Ventas</a>
+                <a href="/ventas/create">Crear Venta</a>
                 <a href="/ventas/update">Actualizar Venta</a>
                 <a href="/ventas/delete">Eliminar Venta</a>
             </div>
         </div>
+        
         <a href="/historial">Historial</a>
+        <a href="/graficas">Gráficas</a>
         <a href="/planning">Planificación</a>
-        <a href="/informacion-del-proyecto">Información del Proyecto</a>
+        <a href="/informacion_del_proyecto">Información del Proyecto</a>
     </nav>
+
+    {% include 'sidebar.html' %}
 
     <div class="container">
         <div class="main-content">
@@ -132,145 +144,40 @@
     </div>
 
     <footer>
-        <p>&copy; 2023 Inventario y Ventas API. Todos los derechos reservados.</p>
     </footer>
+
+    <script>
+        // Sidebar y submenu toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const body = document.body;
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            body.classList.toggle('sidebar-open');
+        }
+
+        function toggleSubmenu(element) {
+            element.classList.toggle('active');
+            const submenu = element.nextElementSibling;
+            if (submenu.style.maxHeight) {
+                submenu.style.maxHeight = null;
+            } else {
+                submenu.style.maxHeight = submenu.scrollHeight + "px";
+            }
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.querySelector('.hamburger-btn');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (!sidebar.contains(event.target) && !hamburger.contains(event.target) && sidebar.classList.contains('open')) {
+                toggleSidebar();
+            }
+        });
+    </script>
 </body>
 </html>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Información del Proyecto - Inventario y Ventas API</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
-    <nav class="navbar">
-        <a href="/">Inicio</a>
-        <div class="dropdown">
-            <button class="dropbtn">Categorías</button>
-            <div class="dropdown-content">
-                <a href="/categorias">Ver Categorías</a>
-                <a href="/categorias/create">Crear Categoría</a>
-                <a href="/categorias/update">Actualizar Categoría</a>
-            </div>
-        </div>
-        <div class="dropdown">
-            <button class="dropbtn">Productos</button>
-            <div class="dropdown-content">
-                <a href="/productos">Ver Productos</a>
-                <a href="/productos/update">Actualizar Producto</a>
-            </div>
-        </div>
-        <div class="dropdown">
-            <button class="dropbtn">Clientes</button>
-            <div class="dropdown-content">
-                <a href="/clientes">Ver Clientes</a>
-                <a href="/clientes/create">Crear Cliente</a>
-                <a href="/clientes/update">Actualizar Cliente</a>
-            </div>
-        </div>
-        <div class="dropdown">
-            <button class="dropbtn">Ventas</button>
-            <div class="dropdown-content">
-                <a href="/ventas">Ver Ventas</a>
-                <a href="/ventas/update">Actualizar Venta</a>
-                <a href="/ventas/delete">Eliminar Venta</a>
-            </div>
-        </div>
-        <a href="/historial">Historial</a>
-        <a href="/planning">Planificación</a>
-        <a href="/informacion-del-proyecto">Información del Proyecto</a>
-    </nav>
-
-    <div class="container">
-        <div class="main-content">
-            <h1>Información del Proyecto</h1>
-
-            <h2>Descripción General</h2>
-            <p>Este proyecto es una API RESTful completa para la gestión de inventarios y ventas, desarrollada con FastAPI y PostgreSQL. El sistema permite manejar productos, clientes, ventas, categorías y usuarios con funcionalidades avanzadas como subida de imágenes y auditoría de eliminaciones.</p>
-
-            <h2>Arquitectura del Sistema</h2>
-            <ul>
-                <li><strong>Backend:</strong> FastAPI con SQLAlchemy ORM</li>
-                <li><strong>Base de Datos:</strong> PostgreSQL</li>
-                <li><strong>Autenticación:</strong> JWT tokens</li>
-                <li><strong>Almacenamiento de Imágenes:</strong> Supabase</li>
-                <li><strong>Documentación:</strong> Swagger UI y ReDoc</li>
-            </ul>
-
-            <h2>Modelos de Datos</h2>
-            <h3>Usuario</h3>
-            <ul>
-                <li>ID (UUID)</li>
-                <li>Nombre (string)</li>
-                <li>Cédula (string)</li>
-                <li>Correo (string, único)</li>
-                <li>Rol (enum: admin, vendedor, cliente)</li>
-                <li>Fecha de creación (datetime)</li>
-            </ul>
-
-            <h3>Producto</h3>
-            <ul>
-                <li>ID (UUID)</li>
-                <li>Nombre (string)</li>
-                <li>Descripción (text)</li>
-                <li>Cantidad (integer)</li>
-                <li>Valor unitario (decimal)</li>
-                <li>Valor mayorista (decimal)</li>
-                <li>Categoría ID (UUID, FK)</li>
-                <li>Imagen URL (string)</li>
-                <li>Fecha de creación (datetime)</li>
-            </ul>
-
-            <h3>Cliente</h3>
-            <ul>
-                <li>ID (UUID)</li>
-                <li>Nombre (string)</li>
-                <li>Cédula (string)</li>
-                <li>Correo (string)</li>
-                <li>Teléfono (string)</li>
-                <li>Dirección (text)</li>
-                <li>Fecha de creación (datetime)</li>
-            </ul>
-
-            <h3>Venta</h3>
-            <ul>
-                <li>ID (UUID)</li>
-                <li>Cliente ID (UUID, FK)</li>
-                <li>Producto ID (UUID, FK)</li>
-                <li>Cantidad (integer)</li>
-                <li>Precio unitario aplicado (decimal)</li>
-                <li>Total (decimal, calculado)</li>
-                <li>Fecha de creación (datetime)</li>
-            </ul>
-
-            <h3>Categoría</h3>
-            <ul>
-                <li>ID (UUID)</li>
-                <li>Nombre (string)</li>
-                <li>Código (string)</li>
-                <li>Imagen URL (string)</li>
-                <li>Fecha de creación (datetime)</li>
-            </ul>
-
-            <h2>Endpoints Principales</h2>
-            <ul>
-                <li><code>GET /</code> - Estado general de la API</li>
-                <li><code>GET /health</code> - Verificación de salud</li>
-                <li><code>GET /docs</code> - Documentación Swagger UI</li>
-                <li><code>GET /redoc</code> - Documentación ReDoc</li>
-            </ul>
-
-            <h2>Desarrollador</h2>
-            <p>Proyecto desarrollado por [Nombre del Desarrollador]</p>
-            <p>Fecha de desarrollo: [Fecha]</p>
-        </div>
-    </div>
-
-    <footer>
-        <p>&copy; 2023 Inventario y Ventas API. Todos los derechos reservados.</p>
-    </footer>
-</body>
-</html>
-<!DOCTYPE html>

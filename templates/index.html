@@ -7,12 +7,84 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+    <nav class="navbar">
+        <a href="/">Inicio</a>
+        
+        <div class="dropdown">
+            <button class="dropbtn">Categorías</button>
+            <div class="dropdown-content">
+                <a href="/categorias">Ver Categorías</a>
+                <a href="/categorias/create">Crear Categoría</a>
+                <a href="/categorias/update">Actualizar Categoría</a>
+                <a href="/categorias/delete">Eliminar Categoría</a>
+            </div>
+        </div>
+        
+        <div class="dropdown">
+            <button class="dropbtn">Productos</button>
+            <div class="dropdown-content">
+                <a href="/productos">Ver Productos</a>
+                <a href="/productos/create">Crear Producto</a>
+                <a href="/productos/update">Actualizar Producto</a>
+                <a href="/productos/delete">Eliminar Producto</a>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <button class="dropbtn">Clientes</button>
+            <div class="dropdown-content">
+                <a href="/clientes">Ver Clientes</a>
+                <a href="/clientes/create">Crear Cliente</a>
+                <a href="/clientes/update">Actualizar Cliente</a>
+                <a href="/clientes/delete">Eliminar Cliente</a>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <button class="dropbtn">Ventas</button>
+            <div class="dropdown-content">
+                <a href="/ventas">Ver Ventas</a>
+                <a href="/ventas/create">Crear Venta</a>
+                <a href="/ventas/update">Actualizar Venta</a>
+                <a href="/ventas/delete">Eliminar Venta</a>
+            </div>
+        </div>
+
+        <a href="/historial">Historial</a>
+        <a href="/graficas">Gráficas</a>
+        <a href="/planning">Planificación</a>
+        <a href="/informacion_del_proyecto">Información del Proyecto</a>
+    </nav>
+
     {% include 'sidebar.html' %}
 
     <div class="container">
-        <h1>Bienvenido a la API de Inventario y Ventas</h1>
-        <p>Esta aplicación permite gestionar categorías, productos, clientes y ventas de manera eficiente.</p>
-        <p>Utiliza el menú lateral para acceder a las diferentes secciones.</p>
+        <h1>Bienvenido a la papelería <strong>Mundiclass</strong></h1>
+        <p>Esta aplicación web (Web Service) ha sido diseñada para gestionar de forma completa la operación de una papelería. Mundiclass permite inventariar productos, controlar stock, crear y registrar ventas, gestionar clientes y obtener reportes y gráficas que ayudan en la toma de decisiones comerciales.</p>
+
+        <h2>¿Qué puede hacer Mundiclass?</h2>
+        <ul>
+            <li><strong>Inventario:</strong> Registrar y clasificar productos por categorías, controlar cantidades y valores unitarios.</li>
+            <li><strong>Manejo de Productos:</strong> Crear, leer, actualizar y eliminar productos; asignar códigos y categorías; validaciones para evitar duplicados.</li>
+            <li><strong>Creación de Ventas:</strong> Registrar ventas asociadas a clientes, aplicar precios por unidad, calcular totales y actualizar el inventario automáticamente.</li>
+            <li><strong>Clientes:</strong> Gestionar la base de clientes, identificar clientes frecuentes y segmentarlos por tipo (minorista/mayorista).</li>
+            <li><strong>Historial y Trazabilidad:</strong> Mantener registro de eliminaciones y cambios para auditoría y recuperación de datos.</li>
+            <li><strong>Reportes y Gráficas:</strong> Visualizaciones (Chart.js) para productos por categoría, ventas por mes, top clientes, valor de inventario, entre otras.</li>
+            <li><strong>Import/Export y Utilidades (posible extensión):</strong> Soporte para cargar datos desde scripts SQL o CSV, exportar reportes y generar respaldos.</li>
+        </ul>
+
+        <h2>¿Cómo funciona (resumen)?</h2>
+        <p>El sistema expone endpoints REST para las operaciones principales (categorías, productos, clientes y ventas). La interfaz web consume estas rutas para ofrecer formularios y listados. Las acciones críticas (p. ej. creación de categorías con código) incluyen validaciones en el backend para garantizar la integridad de los datos.</p>
+
+        <h2>Extensiones posibles</h2>
+        <p>Entre las mejoras que se pueden añadir están: control de usuarios y permisos, reportes programados, alertas por bajo stock, generación de facturas, integración con terminales de pago y panel administrativo avanzado.</p>
+
+        <h2>Créditos y contexto académico</h2>
+        <p>Esta aplicación fue realizada como trabajo para la materia <strong>Desarrollo de Software</strong>.</p>
+        <p><strong>Creadora:</strong> Laura Omaña Berrio<br>
+        <strong>Profesor:</strong> Sergio Iván Galvis Mota</p>
+
+        <p>Utiliza el menú lateral o la barra superior para navegar entre las secciones: <em>Categorías</em>, <em>Productos</em>, <em>Clientes</em>, <em>Ventas</em>, <em>Gráficas</em> y <em>Planificación</em>.</p>
     </div>
 
     <script>

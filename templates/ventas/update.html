@@ -12,47 +12,204 @@
         <div class="dropdown">
             <button class="dropbtn">Categorías</button>
             <div class="dropdown-content">
-                <a href="../categorias/read.html">Ver Categorías</a>
-                <a href="../categorias/create.html">Crear Categoría</a>
-                <a href="../categorias/update.html">Actualizar Categoría</a>
-                <a href="../categorias/delete.html">Eliminar Categoría</a>
+                <a href="/categorias">Ver Categorías</a>
+                <a href="/categorias/create">Crear Categoría</a>
+                <a href="/categorias/update">Actualizar Categoría</a>
+                <a href="/categorias/delete">Eliminar Categoría</a>
             </div>
         </div>
         <div class="dropdown">
             <button class="dropbtn">Productos</button>
             <div class="dropdown-content">
-                <a href="../productos/read.html">Ver Productos</a>
-                <a href="../productos/create.html">Crear Producto</a>
-                <a href="../productos/update.html">Actualizar Producto</a>
-                <a href="../productos/delete.html">Eliminar Producto</a>
+                <a href="/productos">Ver Productos</a>
+                <a href="/productos/create">Crear Producto</a>
+                <a href="/productos/update">Actualizar Producto</a>
+                <a href="/productos/delete">Eliminar Producto</a>
             </div>
         </div>
         <div class="dropdown">
             <button class="dropbtn">Clientes</button>
             <div class="dropdown-content">
-                <a href="../clientes/read.html">Ver Clientes</a>
-                <a href="../clientes/create.html">Crear Cliente</a>
-                <a href="../clientes/update.html">Actualizar Cliente</a>
-                <a href="../clientes/delete.html">Eliminar Cliente</a>
+                <a href="/clientes">Ver Clientes</a>
+                <a href="/clientes/create">Crear Cliente</a>
+                <a href="/clientes/update">Actualizar Cliente</a>
+                <a href="/clientes/delete">Eliminar Cliente</a>
             </div>
         </div>
         <div class="dropdown">
             <button class="dropbtn">Ventas</button>
             <div class="dropdown-content">
-                <a href="read.html">Ver Ventas</a>
-                <a href="create.html">Crear Venta</a>
-                <a href="update.html">Actualizar Venta</a>
-                <a href="delete.html">Eliminar Venta</a>
+                <a href="/ventas">Ver Ventas</a>
+                <a href="/ventas/create">Crear Venta</a>
+                <a href="/ventas/update">Actualizar Venta</a>
+                <a href="/ventas/delete">Eliminar Venta</a>
             </div>
         </div>
-        <a href="/historial.html">Historial</a>
-        <a href="/planning.html">Planificación</a>
-        <a href="/informacion_del_proyecto.html">Información del Proyecto</a>
+        <a href="/historial">Historial</a>
+        <a href="/graficas">Gráficas</a>
+        <a href="/planning">Planificación</a>
+        <a href="/informacion_del_proyecto">Información del Proyecto</a>
     </nav>
+
+    {% include 'sidebar.html' %}
 
     <div class="container">
         <h1>Actualizar Venta</h1>
-        <p>Nota: La actualización de ventas no está disponible en la API actual.</p>
+
+        <label for="venta-select">Seleccionar Venta a Actualizar:</label>
+        <select id="venta-select" onchange="loadVentaDetails(this.value)">
+            <option value="">Cargando ventas...</option>
+        </select>
+        
+        <div id="venta-details" style="margin-top: 20px;">
+        </div>
+
+        <div id="message" style="margin-top: 20px;"></div>
     </div>
+
+    <script>
+        const API_URL = '/compras';
+        let ventaActual = null;
+
+        // 1. Cargar la lista de ventas en el selector
+        async function loadVentaSelector() {
+            const select = document.getElementById('venta-select');
+            select.innerHTML = '<option value="">Cargando ventas...</option>';
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('No se pudo cargar la lista de ventas.');
+                
+                const ventas = await response.json();
+                
+                let options = '<option value="">-- Seleccione una Venta --</option>';
+                ventas.forEach(venta => {
+                    const clienteNombre = venta.cliente ? venta.cliente.nombre : 'Cliente Desconocido';
+                    const productoNombre = venta.producto ? venta.producto.nombre : 'Producto Desconocido';
+                    options += `<option value="${venta.id}">ID ${venta.id} - ${clienteNombre} - ${productoNombre} - Total: $${venta.total}</option>`;
+                });
+                select.innerHTML = options;
+
+            } catch (error) {
+                select.innerHTML = '<option value="">Error al cargar ventas</option>';
+                console.error('Error al cargar selector:', error);
+            }
+        }
+
+        // 2. Cargar los detalles de la venta seleccionada en el formulario
+        async function loadVentaDetails(id) {
+            const detailsDiv = document.getElementById('venta-details');
+            if (!id) {
+                detailsDiv.innerHTML = '';
+                ventaActual = null;
+                return;
+            }
+
+            detailsDiv.innerHTML = '<p>Cargando detalles...</p>';
+            try {
+                const response = await fetch(`${API_URL}/${id}`);
+                if (!response.ok) throw new Error('Venta no encontrada.');
+
+                const venta = await response.json();
+                ventaActual = venta;
+
+                // Renderizar formulario con datos actuales
+                detailsDiv.innerHTML = `
+                    <form id="update-venta-form">
+                        <h2>Venta Seleccionada: ID ${venta.id}</h2>
+                        <p><strong>Cliente:</strong> ${venta.cliente ? venta.cliente.nombre : 'N/A'}</p>
+                        <p><strong>Producto:</strong> ${venta.producto ? venta.producto.nombre : 'N/A'}</p>
+                        <p><strong>Fecha:</strong> ${new Date(venta.fecha).toLocaleDateString('es-ES')}</p>
+                        
+                        <label for="cantidad">Cantidad:</label>
+                        <input type="number" id="cantidad" value="${venta.cantidad}" required min="1">
+
+                        <label for="precio_unitario_aplicado">Precio Unitario Aplicado:</label>
+                        <input type="number" step="0.01" id="precio_unitario_aplicado" value="${venta.precio_unitario_aplicado}" required min="0">
+
+                        <label for="total">Total:</label>
+                        <input type="number" step="0.01" id="total" value="${venta.total}" required min="0">
+
+                        <button type="submit">Guardar Cambios</button>
+                    </form>
+                `;
+                
+                // Asignar el event listener al formulario de actualización
+                document.getElementById('update-venta-form').addEventListener('submit', handleUpdate);
+
+            } catch (error) {
+                detailsDiv.innerHTML = `<p style="color: red;">Error al cargar detalles: ${error.message}</p>`;
+                console.error('Error al cargar detalles:', error);
+            }
+        }
+
+        // 3. Manejar el envío de la actualización
+        async function handleUpdate(event) {
+            event.preventDefault();
+            
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = '<p>Actualizando...</p>';
+
+            try {
+                const data = {
+                    cantidad: parseInt(document.getElementById('cantidad').value),
+                    precio_unitario_aplicado: parseFloat(document.getElementById('precio_unitario_aplicado').value),
+                    total: parseFloat(document.getElementById('total').value)
+                };
+
+                const response = await fetch(`${API_URL}/${ventaActual.id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    messageDiv.innerHTML = '<p style="color: green;">Venta actualizada exitosamente.</p>';
+                    loadVentaSelector();
+                    document.getElementById('venta-select').value = '';
+                    document.getElementById('venta-details').innerHTML = '';
+                } else {
+                    const error = await response.json();
+                    messageDiv.innerHTML = `<p style="color: red;">Error al actualizar: ${error.detail || 'Error desconocido'}</p>`;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<p style="color: red;">Error de red: ${error.message}</p>`;
+            }
+        }
+
+        // Inicializar
+        window.onload = () => loadVentaSelector();
+
+        // Sidebar y submenu toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const body = document.body;
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            body.classList.toggle('sidebar-open');
+        }
+
+        function toggleSubmenu(element) {
+            element.classList.toggle('active');
+            const submenu = element.nextElementSibling;
+            if (submenu.style.maxHeight) {
+                submenu.style.maxHeight = null;
+            } else {
+                submenu.style.maxHeight = submenu.scrollHeight + "px";
+            }
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.querySelector('.hamburger-btn');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (!sidebar.contains(event.target) && !hamburger.contains(event.target) && sidebar.classList.contains('open')) {
+                toggleSidebar();
+            }
+        });
+    </script>
 </body>
 </html>

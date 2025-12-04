@@ -95,6 +95,9 @@ class Cliente(Base):
     tipo_cliente = Column(String(20), nullable=True)  # mayorista / minorista
     cliente_frecuente = Column(Boolean, nullable=False, default=False)
 
+    telefono = Column(String(20), nullable=True)
+    direccion = Column(String(250), nullable=True)
+
     usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
 
     creado_en = Column(

@@ -12,55 +12,237 @@
         <div class="dropdown">
             <button class="dropbtn">Categorías</button>
             <div class="dropdown-content">
-                <a href="categorias/read.html">Ver Categorías</a>
-                <a href="categorias/create.html">Crear Categoría</a>
-                <a href="categorias/update.html">Actualizar Categoría</a>
-                <a href="categorias/delete.html">Eliminar Categoría</a>
+                <a href="/categorias">Ver Categorías</a>
+                <a href="/categorias/create">Crear Categoría</a>
+                <a href="/categorias/update">Actualizar Categoría</a>
+                <a href="/categorias/delete">Eliminar Categoría</a>
             </div>
         </div>
         <div class="dropdown">
             <button class="dropbtn">Productos</button>
             <div class="dropdown-content">
-                <a href="productos/read.html">Ver Productos</a>
-                <a href="productos/create.html">Crear Producto</a>
-                <a href="productos/update.html">Actualizar Producto</a>
-                <a href="productos/delete.html">Eliminar Producto</a>
+                <a href="/productos">Ver Productos</a>
+                <a href="/productos/create">Crear Producto</a>
+                <a href="/productos/update">Actualizar Producto</a>
+                <a href="/productos/delete">Eliminar Producto</a>
             </div>
         </div>
         <div class="dropdown">
             <button class="dropbtn">Clientes</button>
             <div class="dropdown-content">
-                <a href="clientes/read.html">Ver Clientes</a>
-                <a href="clientes/create.html">Crear Cliente</a>
-                <a href="clientes/update.html">Actualizar Cliente</a>
-                <a href="clientes/delete.html">Eliminar Cliente</a>
+                <a href="/clientes">Ver Clientes</a>
+                <a href="/clientes/create">Crear Cliente</a>
+                <a href="/clientes/update">Actualizar Cliente</a>
+                <a href="/clientes/delete">Eliminar Cliente</a>
             </div>
         </div>
         <div class="dropdown">
             <button class="dropbtn">Ventas</button>
             <div class="dropdown-content">
-                <a href="ventas/read.html">Ver Ventas</a>
-                <a href="ventas/create.html">Crear Venta</a>
-                <a href="ventas/update.html">Actualizar Venta</a>
-                <a href="ventas/delete.html">Eliminar Venta</a>
+                <a href="/ventas">Ver Ventas</a>
+                <a href="/ventas/create">Crear Venta</a>
+                <a href="/ventas/update">Actualizar Venta</a>
+                <a href="/ventas/delete">Eliminar Venta</a>
             </div>
         </div>
-        <a href="/historial.html">Historial</a>
-        <a href="/planning.html">Planificación</a>
-        <a href="/informacion_del_proyecto.html">Información del Proyecto</a>
+        <a href="/historial">Historial</a>
+        <a href="/graficas">Gráficas</a>
+        <a href="/planning">Planificación</a>
+        <a href="/informacion_del_proyecto">Información del Proyecto</a>
     </nav>
+
+    {% include 'sidebar.html' %}
 
     <div class="container">
         <h1>Planificación del Proyecto</h1>
-        <p>Esta sección está dedicada a la planificación y organización del proyecto de Inventario y Ventas.</p>
-        <p>Aquí puedes agregar notas, tareas pendientes, cronogramas y cualquier información relevante para el desarrollo del proyecto.</p>
+
+        <h2>Introducción</h2>
+        <p>Esta es una aplicación para la papelería llamada <strong>Mundiclass</strong>. El propósito principal de la aplicación es inventariar todos los productos de la tienda, generar un registro detallado de los mismos, facilitar la gestión de clientes y ventas, y ofrecer herramientas de análisis visual (gráficas) para la toma de decisiones. Además, Mundiclass permitirá mantener un historial de movimientos, registrar compras/ventas y proteger la integridad de los datos mediante validaciones (por ejemplo, códigos de categoría únicos).</p>
+
+        <h2>Objetivos</h2>
         <ul>
-            <li>Desarrollo de la API REST asíncrona</li>
-            <li>Implementación de la interfaz web</li>
-            <li>Gestión de base de datos</li>
-            <li>Pruebas y validación</li>
-            <li>Despliegue y mantenimiento</li>
+            <li>Inventariar y catalogar todos los productos de la papelería.</li>
+            <li>Registrar clientes y sus transacciones.</li>
+            <li>Proveer una interfaz web para CRUD de categorías, productos, clientes y ventas.</li>
+            <li>Generar reportes y gráficas que faciliten el análisis comercial.</li>
+            <li>Garantizar integridad de datos y trazabilidad (historial de eliminaciones/ediciones).</li>
         </ul>
+
+        <h2>Alcance</h2>
+        <p>El alcance de esta planificación cubre el diseño, desarrollo, pruebas, puesta en producción y capacitación para la aplicación Mundiclass durante un periodo de 16 semanas.</p>
+
+        <h2>Metodología</h2>
+        <p>Se propone un enfoque iterativo e incremental con entregables al final de cada fase importante. Cada semana incluye tareas específicas y revisiones de progreso.</p>
+
+        <h2>Cronograma de 16 semanas (Etapas del Diseño y Desarrollo)</h2>
+        <ol>
+            <li>
+                <strong>Semana 1 — Análisis y Requisitos</strong>
+                <ul>
+                    <li>Reunión inicial con stakeholders (dueño de la papelería, encargados).</li>
+                    <li>Recopilar requisitos funcionales y no funcionales.</li>
+                    <li>Crear lista de casos de uso y priorizar funcionalidades mínimas (MVP).</li>
+                    <li>Entregable: Documento de Requisitos y alcance del MVP.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Semana 2 — Diseño de Datos y Modelado</strong>
+                <ul>
+                    <li>Diseñar el modelo de datos (categorías, productos, clientes, compras, historial).</li>
+                    <li>Definir claves, índices y restricciones (ej. código de categoría único).</li>
+                    <li>Crear script de base de datos inicial (`datos.sql`).</li>
+                    <li>Entregable: Diagrama ER y script de inicialización de BD.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Semana 3 — Arquitectura y APIs</strong>
+                <ul>
+                    <li>Definir arquitectura backend (FastAPI, SQLAlchemy asíncrono).</li>
+                    <li>Especificar endpoints principales (CRUD, autenticación si aplica).</li>
+                    <li>Entregable: Especificación de API y rutas principales.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Semana 4 — Diseño de UI/UX</strong>
+                <ul>
+                    <li>Diseñar estructura de las vistas (plantillas Jinja2, navegación, sidebar).</li>
+                    <li>Mockups para páginas clave: categorías, productos, clientes, ventas, gráficas y planificación.</li>
+                    <li>Entregable: Mockups y guía de estilos básicos.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Semana 5 a 8 — Desarrollo Iterativo (Core)</strong>
+                <ul>
+                    <li>Semana 5: Implementar modelos y migraciones; endpoints CRUD básicos.</li>
+                    <li>Semana 6: Implementar lógica de negocio (validaciones de código único, historial de eliminaciones).</li>
+                    <li>Semana 7: Implementar vistas de frontend para categorías y productos (listado, crear, actualizar, eliminar).</li>
+                    <li>Semana 8: Implementar clientes y ventas; flujo de compra/venta y actualización de inventario.</li>
+                    <li>Entregables: APIs funcionales y vistas para las entidades principales.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Semana 9 — Integración de Gráficas y Reportes</strong>
+                <ul>
+                    <li>Integrar Chart.js para generar gráficas a partir de datos (productos por categoría, ventas por mes, top clientes, valor de inventario).</li>
+                    <li>Crear página de `graficas` y conectar con datos embebidos o API según decisión.</li>
+                    <li>Entregable: Página de gráficas con al menos 4 visualizaciones interactiva.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Semana 10 — Autenticación y Seguridad (opcional)</strong>
+                <ul>
+                    <li>Agregar autenticación básica si se requiere (login de administradores).</li>
+                    <li>Reforzar validaciones y sanitización de inputs.</li>
+                    <li>Entregable: Sistema de acceso y políticas de seguridad documentadas.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Semana 11 — Pruebas Unitarias e Integración</strong>
+                <ul>
+                    <li>Escribir tests para endpoints críticos y lógica de inventario.</li>
+                    <li>Ejecutar pruebas de integración y corrección de bugs encontrados.</li>
+                    <li>Entregable: Suite de pruebas básica y reporte de cobertura parcial.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Semana 12 — Pruebas de Usuario y Ajustes UX</strong>
+                <ul>
+                    <li>Hacer pruebas con usuarios reales (encargados de la papelería) para validar flujos.</li>
+                    <li>Priorizar y aplicar ajustes de usabilidad.</li>
+                    <li>Entregable: Lista de cambios UX aplicados y feedback documentado.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Semana 13 — Optimización y Documentación</strong>
+                <ul>
+                    <li>Optimizar consultas y páginas lentas; añadir índices si es necesario.</li>
+                    <li>Completar documentación técnica (README, endpoints, cómo ejecutar `datos.sql`).</li>
+                    <li>Entregable: Documentación del proyecto y mejoras de rendimiento.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Semana 14 — Preparación de Despliegue</strong>
+                <ul>
+                    <li>Configurar entorno de producción (dependencias, entornos, variables de entorno).</li>
+                    <li>Preparar scripts de despliegue y backups de la base de datos.</li>
+                    <li>Entregable: Plan de despliegue y checklist de producción.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Semana 15 — Capacitación y Transferencia</strong>
+                <ul>
+                    <li>Capacitar al personal de la papelería en el uso de la aplicación.</li>
+                    <li>Entregar manuales de usuario y guías rápidas.</li>
+                    <li>Entregable: Sesiones de capacitación y material entregado.</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Semana 16 — Cierre y Evaluación Post-Implementación</strong>
+                <ul>
+                    <li>Evaluar métricas iniciales de uso e impacto en la operación.</li>
+                    <li>Recolectar feedback final y planificar mejoras futuras (roadmap).</li>
+                    <li>Entregable: Informe de cierre y plan de mantenimiento/next steps.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h2>Entregables comunes por etapa</h2>
+        <ul>
+            <li>Documentos de requisitos y diseño.</li>
+            <li>Scripts de base de datos (`datos.sql`).</li>
+            <li>Código fuente organizado por módulos (backend, templates, static).</li>
+            <li>Tests automatizados y reportes de pruebas.</li>
+            <li>Materiales de capacitación y documentación de usuario.</li>
+        </ul>
+
+        <h2>Notas finales</h2>
+        <p>Este cronograma es una guía; las semanas pueden ajustarse según recursos, prioridades y hallazgos durante las pruebas. Se recomienda revisiones semanales con el cliente para validar entregables y repriorizar si es necesario.</p>
     </div>
+
+    <script>
+        // Sidebar y submenu toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const body = document.body;
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            body.classList.toggle('sidebar-open');
+        }
+
+        function toggleSubmenu(element) {
+            element.classList.toggle('active');
+            const submenu = element.nextElementSibling;
+            if (submenu.style.maxHeight) {
+                submenu.style.maxHeight = null;
+            } else {
+                submenu.style.maxHeight = submenu.scrollHeight + "px";
+            }
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.querySelector('.hamburger-btn');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (!sidebar.contains(event.target) && !hamburger.contains(event.target) && sidebar.classList.contains('open')) {
+                toggleSidebar();
+            }
+        });
+    </script>
 </body>
 </html>

@@ -9,41 +9,54 @@
 <body>
     <nav class="navbar">
         <a href="/">Inicio</a>
+        
         <div class="dropdown">
             <button class="dropbtn">Categorías</button>
             <div class="dropdown-content">
                 <a href="/categorias">Ver Categorías</a>
                 <a href="/categorias/create">Crear Categoría</a>
                 <a href="/categorias/update">Actualizar Categoría</a>
+                <a href="/categorias/delete">Eliminar Categoría</a>
             </div>
         </div>
+        
         <div class="dropdown">
             <button class="dropbtn">Productos</button>
             <div class="dropdown-content">
                 <a href="/productos">Ver Productos</a>
+                <a href="/productos/create">Crear Producto</a>
                 <a href="/productos/update">Actualizar Producto</a>
+                <a href="/productos/delete">Eliminar Producto</a>
             </div>
         </div>
+
         <div class="dropdown">
             <button class="dropbtn">Clientes</button>
             <div class="dropdown-content">
                 <a href="/clientes">Ver Clientes</a>
                 <a href="/clientes/create">Crear Cliente</a>
                 <a href="/clientes/update">Actualizar Cliente</a>
+                <a href="/clientes/delete">Eliminar Cliente</a>
             </div>
         </div>
+
         <div class="dropdown">
             <button class="dropbtn">Ventas</button>
             <div class="dropdown-content">
                 <a href="/ventas">Ver Ventas</a>
+                <a href="/ventas/create">Crear Venta</a>
                 <a href="/ventas/update">Actualizar Venta</a>
                 <a href="/ventas/delete">Eliminar Venta</a>
             </div>
         </div>
+
         <a href="/historial">Historial</a>
+        <a href="/graficas">Gráficas</a>
         <a href="/planning">Planificación</a>
-        <a href="/informacion-del-proyecto">Información del Proyecto</a>
+        <a href="/informacion_del_proyecto">Información del Proyecto</a>
     </nav>
+    
+    {% include 'sidebar.html' %}
 
     <div class="container">
         <h1>Crear Categoría</h1>
@@ -74,7 +87,8 @@
             const messageDiv = document.getElementById('message');
 
             try {
-                const response = await fetch('/categorias', {
+                // Se asume que la ruta de la API para crear categorías es '/api/categorias'
+                const response = await fetch('/api/categorias', {
                     method: 'POST',
                     body: formData
                 });
@@ -84,8 +98,19 @@
                     messageDiv.innerHTML = '<p style="color: green;">Categoría creada exitosamente: ' + result.nombre + '</p>';
                     this.reset();
                 } else {
-                    const error = await response.json();
-                    messageDiv.innerHTML = '<p style="color: red;">Error: ' + error.detail + '</p>';
+                    let errorMessage = 'Error desconocido';
+                    try {
+                        const error = await response.json();
+                        errorMessage = error.detail || 'Error al crear la categoría';
+                    } catch (e) {
+                        // Si no es JSON, intentar obtener el texto de la respuesta
+                        try {
+                            errorMessage = await response.text();
+                        } catch (textError) {
+                            errorMessage = 'Error de conexión';
+                        }
+                    }
+                    messageDiv.innerHTML = '<div style="color: red; padding: 10px; border: 1px solid red; border-radius: 5px; margin-top: 10px;"><strong>Error:</strong> ' + errorMessage + '</div>';
                 }
             } catch (error) {
                 messageDiv.innerHTML = '<p style="color: red;">Error de red: ' + error.message + '</p>';
